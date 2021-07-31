@@ -1,6 +1,6 @@
 # Bunch
 
-A bunch is a series of trajectories. Some of them are alive, which means they can grow as new points are added to them, wheras other are dead---they're no longer able to grow.
+A bunch is a series of trajectories. Some of them are alive, which means they can grow as new points are added to them, whereas other are dead---they're no longer able to grow.
 
 ## Creation
 

@@ -1,7 +1,5 @@
 # Trajectory
 
-## Single trajectory
-
 A trajectory is just a series of points with a starting time. For instance:
 ``` python
 import BrownTrack as BT

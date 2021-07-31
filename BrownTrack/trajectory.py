@@ -101,10 +101,21 @@ def load_trajectories( traj_file, max_number_of_trajectories = inf, theta = None
 
 ################### BUNCH (i.e. bunch of trajectories) ###################
 
-class Bunch :
-    '''Collection of 2D trajectories, from class Trajectory.'''
+class bunch :
+    '''Collection of trajectories.'''
 
     def __init__( self, live_trajectories, dead_trajectories ) :
+        '''
+        Create a bunch of trajectories.
+
+        bunch( live_trajectories, dead_trajectories )
+
+        Parameters:
+        live_trajectories: A list of trajectories which end at present time.
+        dead_trajectories: A list of trajectories which have ended.
+
+        '''
+
         self.live_trajectories = live_trajectories
         self.dead_trajectories = dead_trajectories
 
@@ -116,7 +127,7 @@ class Bunch :
         if type(trajectories) == list :
             self.live_trajectories += trajectories
 
-        elif isinstance(trajectories, Trajectory) :
+        elif isinstance(trajectories, trajectory) :
             self.live_trajectories += [ trajectories ]
 
         else :
@@ -148,11 +159,12 @@ class Bunch :
     def undertake( self ) :
         self.dead_trajectories = []
 
-    '''save trajectories in a text file
-       a user defined filetr traj_filter may be used to filter trajectories
-       before saving them.
-    '''
+
     def bury( self, traj_file, traj_filter = lambda trajectory: True ) :
+        '''
+        Save trajectories in a text file.
+        A user defined filter traj_filter may be used to filter trajectories before saving them.
+        '''
 
         for traj in self.dead_trajectories :
 
@@ -165,6 +177,14 @@ class Bunch :
         self.live_trajectories = []
 
     def grow( self, tracks, new_points ) :
+
+        '''
+        grow( tracks, new_points )
+
+        Parameters:
+        tracks: A list of tuples. Each tuple contains two indices. The first index is that of the trajectory to be grown. The second is that of the new point.
+        new_points: The points to be added to the trajectories.
+        '''
 
         for track in tracks :
             self.live_trajectories[ track[0] ].addPoint( new_points[ track[1] ] )

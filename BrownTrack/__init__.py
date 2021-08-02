@@ -16,7 +16,7 @@
 #
 # Olivier Devauchelle, 2021
 #
-# Based on a library initially developped by O.~Devauchelle, A.~Abramian & E.~Lajeunesse
+# Based on a library initially developped by O.~Devauchelle, A.~Abramian & E.~Lajeunesse with the help of J.~Heyman
 
 """
 BrownTrack main file
@@ -28,5 +28,6 @@ __license__ = "GPL"
 __version__ = "0.1"
 
 from BrownTrack.trajectory import *
+from BrownTrack.assignment import *
 
-__all__ = ['trajectory']
+__all__ = [ 'trajectory', 'assignment' ]

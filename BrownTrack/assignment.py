@@ -1,0 +1,82 @@
+from pylab import *
+from munkres import Munkres
+
+def build_cost_matrix( X1, X2, appaearance_prob_length, disappaearance_prob_length ) :
+
+    N1 = len(X1)
+    N2 = len(X2)
+
+    cost_matrix = zeros( ( N1 + N2, N1 + N2 ) )
+
+    for n1 in range(N1) :
+        for n2 in range(N2) :
+            dx = array( X2[n2] ) - array( X1[n1] )
+            cost_matrix[ n1, n2 ] = dot( dx, dx )
+
+    cost_matrix[ N1:, :N2 ] = zeros( ( N2, N2 ) ) + appaearance_prob_length**2
+    cost_matrix[ :N1, N2: ] = zeros( ( N1, N1 ) ) + disappaearance_prob_length**2
+
+    return cost_matrix
+
+def find_proper_links( links, N1, N2 ) :
+
+    proper_links = []
+
+    for link in links :
+        if link[0] < N1 and link[1] < N2 :
+            proper_links += [ link ]
+
+    return proper_links
+
+
+def assign( X1, X2, mismatch_length ) :
+
+    '''
+    Pairs points from two list, trying to minimize the total distance, using the Kuhn-Munkres algorithm as implementend in the munkres library (https://pypi.org/project/munkres/).
+
+    links = assign( X1, X2, appearance_prob_length, disappearance_prob_length )
+
+    Arguments:
+    X1: Set of points.
+    X2: Set of points.
+    mismatch_length: Length beyond which it's likely that X2 contains a point that doesn't match any point in X1, and vice versa. If mismatch_length is a couple of lenghts, they correspond to a disconnected point in X1 and X2, respectively.
+    '''
+
+    try :
+        mismatch_length[1]
+    except :
+        mismatch_length = [mismatch_length]*2
+
+
+    N1 = len(X1)
+    N2 = len(X2)
+
+    cost_matrix = build_cost_matrix( X1, X2, *mismatch_length )
+
+    links = Munkres().compute( cost_matrix )
+
+    links = find_proper_links( links, N1, N2 )
+
+    return links
+
+if __name__ == '__main__' :
+
+    X1 = rand( 20, 2 )
+    X2 = X1 + .2*( rand( *shape( X1 ) ) - .5 )
+
+    plot( *X1.T, 'o' )
+    plot( *X2.T, 'o' )
+
+    for link in assign( X1, X2, 1 ) :
+
+        if link[0] == link[1] : # then the pairing is correct
+            linestyle = '-'
+        else :
+            linestyle = ':'
+
+        plot( *array( [ X1[ link[0] ], X2[ link[1] ] ] ).T, color = 'grey', linestyle = linestyle, zorder = -1 )
+
+    axis('scaled')
+    xticks([])
+    yticks([])
+    show()

@@ -4,7 +4,7 @@ To build the trajectories of moving particles, we need to identify them, and fol
 
 BrownTrack uses the Kuhn-Munkres algorithm as implementend in the [munkres library](https://pypi.org/project/munkres/) to do this.
 
-## Successive sets of points
+## <a name="sets_of_points"></a>Successive sets of points
 
 Let's create one set of random points, and then move them around a bit.
 
@@ -42,8 +42,46 @@ for link in links :
 
 ![Simple paring](../figures/assignment.svg)
 
+## Expected step size
+
+The last argument of `BrownTrack.assign` is the expected step size---the typical length beyond which it's unlikely that two points correspond to the same particle.
+
+If we move one point a bit too much, like so:
+
+```python
+X1 = rand( 5, 2 )
+X2 = X1 + .2*( rand( *shape( X1 ) ) - .5 )
+X2[0] += 0.5
+```
+
+then the assignment can be wrong. It is probably safer to drop `X2[0]` altogether. For instance:
+
+```python
+fig, axs = subplots( ncols = 2, figsize = (8,6) )
+
+for ax in axs :
+    ax.plot( *X1.T, 'o' )
+    ax.plot( *X2.T, 'o' )
+
+for i, length in enumerate( [ 1, 0.2 ] ) :
+
+    for link in BT.assign( X1, X2, length ) :
+
+        if link[0] == link[1] : # then the pairing is correct
+            linestyle = '-'
+        else :
+            linestyle = ':'
+
+        axs[i].plot( *array( [ X1[ link[0] ], X2[ link[1] ] ] ).T, color = 'grey', linestyle = linestyle, zorder = -1 )
+        axs[i].set_title( 'length=' + str(length) )
+```
+Dotted lines show wrong pairs.
+
+![Too far](../figures/assignment_too_far.svg)
+
+
 ## Time resolution
 
-When the particles have moved too much between two successive tracking times, they'll be hard to pair. The code above run with 20 points instead of 3 shows the problem. Dotted lines show wrong pairs.
+When the particles have moved too much between two successive tracking times, they'll be hard to pair. The above [code](#sets_of_points) with 20 points instead of 3 illustrate the problem. Dotted lines show wrong pairs.
 
 ![Simple paring](../figures/hard_assignment.svg)

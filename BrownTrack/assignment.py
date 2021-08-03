@@ -59,6 +59,44 @@ def assign( X1, X2, mismatch_length ) :
 
     return links
 
+
+# def assign_to_bunch( points, bunch, mismatch_length, t ) :
+#     '''
+#     Convenience method that assigns new points to the trajectories of a bunch, create new trajectories when necessary, and kills the disconnected trajectories.
+#
+#     bunch = assign_to_bunch( points, bunch, mismatch_length, t )
+#
+#     Returns:
+#     bunch: The bunch after assignement.
+#     '''
+#
+#     try :
+#         links = assign( bunch.getEnds(), points, mismatch_length )
+#         new_point_indices =  list( set( range( len(points) ) ) - set ( [ link[1] for link in links ] ) )
+#     except :
+#         print( 'Link error at time ' + str(t) )
+#
+#     try :
+#         bunch.grow( links, points )
+#     except :
+#         print( 'bunch.grow error at time ' + str(t) )
+#
+#     try :
+#         disconnected_trajectories = list( set( range( len( bunch.live_trajectories ) ) ) - set ( [ link[0] for link in links ] ) )
+#         bunch.kill( disconnected_trajectories )
+#     except :
+#         print( 'bunch.kill error at time ' + str(t) )
+#
+#     try :
+#         for point in points[ new_point_indices ] :
+#              bunch.addTrajectory( Trajectory( t, point ) )
+#
+#     except :
+#         print( 'bunch.addTrajectory error at time ' + str(t) )
+#
+#     return bunch
+
+
 if __name__ == '__main__' :
 
     X1 = rand( 20, 2 )

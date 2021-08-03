@@ -1,6 +1,8 @@
 from pylab import *
 import json
 
+from .assignment import assign
+
 ################### TRAJECTORIES ###################
 
 class trajectory :
@@ -200,3 +202,51 @@ class bunch :
                 y += [ nan ] + trajectory.y[:(t-trajectory.birth_time)]
 
         return x,y
+
+    def getCurrentTime( self ) :
+        try :
+            return max( [ traj.end_time for traj in self.getAllTrajectories() ] )
+        except :
+            return 0
+
+    def assign( self, points, mismatch_length, t = None ) :
+        '''
+        Convenience method that assigns new points to the trajectories of a bunch, create new trajectories when necessary, and kills the disconnected trajectories.
+
+        assign_to_bunch( points, mismatch_length, t = None )
+
+        Returns:
+        points: Set of points to be added to the bunch's trajectories.
+        mismatch_length: Length beyond which it's likely that points contains a point that doesn't match any end point.
+        t: Time of the assignement. If None, find the most recent point among all trajectories.
+        '''
+
+        if t is None :
+            t = self.getCurrentTime()
+
+        try :
+            links = assign( X1 = self.getEnds(), X2 = points, mismatch_length = mismatch_length )
+            new_point_indices =  list( set( range( len(points) ) ) - set ( [ link[1] for link in links ] ) )
+            print(new_point_indices)
+        except :
+            print( 'Link error at time ' + str(t) )
+
+        try :
+            self.grow( links, points )
+        except :
+             print( 'bunch.grow error at time ' + str(t) )
+
+        try :
+            disconnected_trajectories = list( set( range( len( self.live_trajectories ) ) ) - set ( [ link[0] for link in links ] ) )
+            self.kill( disconnected_trajectories )
+        except :
+            print( 'bunch.kill error at time ' + str(t) )
+
+        # print(points[new_point_indices])
+
+        try :
+            for point in array(points)[ new_point_indices ] :
+                print(point)
+                self.addTrajectory( trajectory( t, point ) )
+        except :
+            print( 'bunch.addTrajectory error at time ' + str(t) )

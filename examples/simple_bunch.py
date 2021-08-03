@@ -34,6 +34,6 @@ for trajectory in swarm.live_trajectories :
 
 axis('equal')
 
-savefig(figure_path + 'bunch.svg', bbox_inches = 'tight' )
+# savefig(figure_path + 'bunch.svg', bbox_inches = 'tight' )
 
 show()

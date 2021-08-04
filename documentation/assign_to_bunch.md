@@ -1,6 +1,6 @@
 # Assign points to a bunch
 
-When tracking particles, we need to assign their latest position to their past trajectories. We could use the `assign` method of `BrownTrack` to [do so](./assign.md), but the convenience method `bunch.assign` makes it easier.
+When tracking particles, we need to assign their latest position to their past trajectories. We could use the `assign` method of `BrownTrack` to [do so](./assignment.md), but the convenience method `bunch.assign` makes it easier.
 
 Let's first create an empty bunch.
 

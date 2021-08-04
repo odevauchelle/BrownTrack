@@ -16,12 +16,12 @@ class trajectory :
     end_time : Time of the last point of the trajectory.
     '''
 
-    def __init__( self, birth_time = 0, X = None, mummy = None ) :
+    def __init__( self, X = None, birth_time = 0, mummy = None ) :
 
         '''
         Create a trajectory.
 
-        trajectory( self, birth_time = 0, X = None, mummy = None )
+        trajectory( self, X = None, birth_time = 0, mummy = None )
 
         Arguments:
         birth_time: Starting time of the trajectory.
@@ -252,6 +252,6 @@ class bunch :
         try :
             for point in array(points)[ new_point_indices ] :
                 print(point)
-                self.addTrajectory( trajectory( t, point ) )
+                self.addTrajectory( trajectory( point, t ) )
         except :
             print( 'bunch.addTrajectory error at time ' + str(t) )

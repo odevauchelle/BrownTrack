@@ -106,17 +106,23 @@ def load_trajectories( traj_file, max_number_of_trajectories = inf, theta = None
 class bunch :
     '''Collection of trajectories.'''
 
-    def __init__( self, live_trajectories, dead_trajectories ) :
+    def __init__( self, live_trajectories = None, dead_trajectories = None ) :
         '''
         Create a bunch of trajectories.
 
-        bunch( live_trajectories, dead_trajectories )
+        bunch( live_trajectories = None, dead_trajectories = None )
 
         Parameters:
         live_trajectories: A list of trajectories which end at present time.
         dead_trajectories: A list of trajectories which have ended.
 
         '''
+
+        if live_trajectories is None :
+            live_trajectories = []
+
+        if dead_trajectories is None :
+            dead_trajectories = []
 
         self.live_trajectories = live_trajectories
         self.dead_trajectories = dead_trajectories
@@ -209,11 +215,11 @@ class bunch :
         except :
             return 0
 
-    def assign( self, points, mismatch_length, t = None ) :
+    def assign( self, points, mismatch_length = 1, t = None ) :
         '''
         Convenience method that assigns new points to the trajectories of a bunch, create new trajectories when necessary, and kills the disconnected trajectories.
 
-        assign_to_bunch( points, mismatch_length, t = None )
+        assign_to_bunch( points, mismatch_length = 1, t = None )
 
         Returns:
         points: Set of points to be added to the bunch's trajectories.
@@ -227,7 +233,6 @@ class bunch :
         try :
             links = assign( X1 = self.getEnds(), X2 = points, mismatch_length = mismatch_length )
             new_point_indices =  list( set( range( len(points) ) ) - set ( [ link[1] for link in links ] ) )
-            print(new_point_indices)
         except :
             print( 'Link error at time ' + str(t) )
 

@@ -58,42 +58,41 @@ class trajectory :
     def getEnd( self ) :
         return [ self.x[-1], self.y[-1] ]
 
-    def mummify( self ):
+    def mummify( self, json_serializable = True ):
 
         '''
-        Converts trajectory to dictionnary for storage.
+        Converts trajectory to list for storage in file.
 
         mummify()
 
         '''
-
-        return [
-            self.birth_time,
-            self.x,
-            self.y
-            ]
+        if json_serializable :
+            return [ self.birth_time, array( self.x ).tolist(), array( self.y ).tolist() ]
+        else :
+            return [ self.birth_time, self.x, self.y ]
 
 def load_trajectories( traj_file, max_number_of_trajectories = inf, theta = None ) :
 
     trajectories = []
 
-    for line in traj_file :
+    for line in traj_file.readlines() :
 
         if len( trajectories ) >= max_number_of_trajectories :
             break
 
         try :
 
-            trajectory = trajectory( mummy = json.loads( line ) )
+            traj = trajectory( mummy = json.loads( line ) )
 
             if theta != None : # rotation
-                y = array(trajectory.y); x = array(trajectory.x)
-                trajectory.x = list( cos(theta)*y + sin(theta)*x )
-                trajectory.y = list( cos(theta)*x - sin(theta)*y )
+                y = array(traj.y); x = array(traj.x)
+                traj.x = list( cos(theta)*y + sin(theta)*x )
+                traj.y = list( cos(theta)*x - sin(theta)*y )
 
-            trajectories += [ trajectory ]
+            trajectories += [ traj ]
 
         except :
+            print( 'Could not read line:', line )
             pass
 
     return trajectories
@@ -178,7 +177,7 @@ class bunch :
 
             if traj_filter( traj ):
                 json.dump( traj.mummify(), traj_file, separators = ( ',', ':' ) )
-                traj_file.write('\n')
+                traj_file.write( '\n' )
 
     def killAllTrajectories( self ) :
         self.dead_trajectories += self.live_trajectories
@@ -251,7 +250,6 @@ class bunch :
 
         try :
             for point in array(points)[ new_point_indices ] :
-                print(point)
                 self.addTrajectory( trajectory( point, t ) )
         except :
             print( 'bunch.addTrajectory error at time ' + str(t) )

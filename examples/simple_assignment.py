@@ -29,7 +29,7 @@ axis('scaled')
 xticks([])
 yticks([])
 
-savefig(figure_path + 'assignment.svg', bbox_inches = 'tight' )
+# savefig(figure_path + 'assignment.svg', bbox_inches = 'tight' )
 
 
 show()

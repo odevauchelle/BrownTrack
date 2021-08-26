@@ -31,12 +31,15 @@ for trajectory in bunch.dead_trajectories :
     plot( trajectory.x, trajectory.y, '-o', color = 'grey' )
 
 for trajectory in bunch.live_trajectories :
+    print(type(trajectory.x[-1]))
     plot( trajectory.x, trajectory.y, '-o', color = 'tab:blue' )
 
 axis('scaled')
 yticks([]), xticks([])
 
-savefig(figure_path + 'assign_to_bunch.svg', bbox_inches = 'tight' )
+
+
+# savefig(figure_path + 'assign_to_bunch.svg', bbox_inches = 'tight' )
 
 # figure( figsize = (6,3) )
 # h = 0

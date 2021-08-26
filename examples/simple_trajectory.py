@@ -11,12 +11,16 @@ traj = BT.trajectory( X = ( 0, 0 ) )
 from pylab import *
 
 for _ in range(5) :
-    traj.addPoint( rand(2) )
+    point = rand(2)
+    # plot( *point, 'o' )
+    traj.addPoint( point )
 
-figure()
-plot( traj.x, traj.y, 'o-' )
+
+plot( traj.x, traj.y, '.-' )
 axis('scaled')
-savefig( figure_path + 'simple_trajectory.svg', bbox_inches = 'tight')
+# savefig( figure_path + 'simple_trajectory.svg', bbox_inches = 'tight')
 
+print( traj.x )
+print(type(traj.x[3]))
 
 show()

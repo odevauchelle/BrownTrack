@@ -8,6 +8,8 @@ import BrownTrack as BT
 
 traj = BT.trajectory( X = ( 0, 0 ) )
 
+print( isinstance( traj, BT.trajectory ) )
+
 from pylab import *
 
 for _ in range(5) :

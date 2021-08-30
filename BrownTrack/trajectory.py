@@ -3,6 +3,18 @@ import json
 
 from .assignment import assign
 
+##########################
+#
+# miscellaneous functions
+#
+##########################
+
+def none_to_zero( x ) :
+    if x is None :
+        return 0
+    else :
+        return x
+
 ################### TRAJECTORIES ###################
 
 class trajectory :
@@ -13,20 +25,20 @@ class trajectory :
     x: List of coordinates.
     y: List of coordinates.
     birth_time : Starting time of the trajectory.
-    end_time : Time of the last point of the trajectory.
     '''
 
-    def __init__( self, X = None, birth_time = 0, mummy = None ) :
+    def __init__( self, birth_time = 0, X = None, mummy = None, points = None ) :
 
         '''
         Create a trajectory.
 
-        trajectory( self, X = None, birth_time = 0, mummy = None )
+        trajectory( self, X = None, birth_time = 0, mummy = None, points = None )
 
         Arguments:
         birth_time: Starting time of the trajectory.
         X: Starting point of the trajectory.
         mummy: Mummified trajectory.
+        points: List of points.
 
         '''
 
@@ -34,12 +46,34 @@ class trajectory :
             self.birth_time = birth_time
             self.x = [ X[0] ]
             self.y = [ X[1] ]
-            self.end_time = birth_time + len(self.x)
 
         except :
-            self.birth_time = mummy[0]
-            self.x = mummy[1]
-            self.y = mummy[2]
+
+            try :
+                self.birth_time = mummy[0]
+                self.x = mummy[1]
+                self.y = mummy[2]
+
+            except :
+                self.birth_time = birth_time
+                self.x = array( points )[:,0]
+                self.y = array( points )[:,1]
+
+    def getEndTime( self ) :
+        return self.birth_time + len( self.x )
+
+    def getPoints( self ) :
+        return list( array( [ self.x, self.y ] ).T )
+
+    def __getitem__( self, key ) : #  slicing
+
+        time = range( len( self.x ) )[key]
+
+        if type(key) == int : # returns only a point
+            return self.birth_time + time, ( self.x[key], self.y[key])
+
+        else :
+            return trajectory( points = self.getPoints()[key], birth_time = self.birth_time + time[0] )
 
     def addPoint( self, X ) :
         '''
@@ -53,7 +87,6 @@ class trajectory :
 
         self.x += [ X[0] ]
         self.y += [ X[1] ]
-        self.end_time += 1
 
     def getEnd( self ) :
         return [ self.x[-1], self.y[-1] ]
@@ -202,7 +235,7 @@ class bunch :
         y = []
 
         for trajectory in self.getAllTrajectories() :
-            if trajectory.birth_time < t < trajectory.end_time :
+            if trajectory.birth_time < t < trajectory.getEndTime() :
                 x += [ nan ] + trajectory.x[:(t-trajectory.birth_time)]
                 y += [ nan ] + trajectory.y[:(t-trajectory.birth_time)]
 
@@ -210,7 +243,7 @@ class bunch :
 
     def getCurrentTime( self ) :
         try :
-            return max( [ traj.end_time for traj in self.getAllTrajectories() ] )
+            return max( [ traj.getEndTime() for traj in self.getAllTrajectories() ] )
         except :
             return 0
 

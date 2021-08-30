@@ -29,5 +29,6 @@ __version__ = "0.1"
 
 from BrownTrack.trajectory import *
 from BrownTrack.assignment import *
+from BrownTrack.domain import *
 
-__all__ = [ 'trajectory', 'assignment' ]
+__all__ = [ 'trajectory', 'assignment', 'domain' ]

@@ -1,6 +1,9 @@
 import numpy as np
-from matplotlib.patches import *
+from matplotlib.patches import Circle, Polygon
 import matplotlib.pyplot as plt
+from copy import deepcopy
+# from shapely.geometry import Point, Polygon
+import matplotlib.path as mplPath
 
 # from .trajectory import trajectory
 
@@ -70,6 +73,9 @@ class domain :
 
         self.patch_type = patch_type
         self.boundary = boundary
+
+    def deepcopy( self ) :
+        return deepcopy( self )
 
     def as_dict( self, json_serialize = True ) :
         '''
@@ -159,8 +165,30 @@ class domain :
             self.boundary = old_boundary
             return False
 
+    def contains( self, points ) :
+        '''
+        Whether points are inside domain.
 
-    def cookie_cutter( self, trajectories = None ) :
+        is_inside = domain.contains( points )
+
+        Parameters:
+        points : A list of points.
+
+        Output:
+        is_inside : A list of Booleans (True if inside).
+        '''
+
+        if self.patch_type == 'Circle' :
+            x, y = np.array( points ).T
+            xc, yc = self.boundary['xy']
+            return abs( ( x - xc ) + 1j*( y - yc ) ) < self.boundary['radius']
+
+        elif self.patch_type == 'Polygon' :
+            path = mplPath.Path( self.boundary['xy'] )
+            return path.contains_points( points )
+
+
+    def cookie_cutter( self, trajectory ) :
         '''
         Split trajectories into inside and outside pieces. The resulting pieces are themselves trajectories.
 
@@ -174,22 +202,12 @@ class domain :
         inside : A list of trajectories outside the domain.
         '''
 
-        if trajectories is None :
-            trajectories = []
-
-        try :
-            trajectories.x
-            trajectories = [ trajectories ]
-
-        except :
-            pass
-
         inside = []
         outside = []
 
-        for traj in trajectories :
+        try : # argument is a single trajectory
 
-            is_inside = self.get_patch().get_path().contains_points( traj.getPoints() )
+            is_inside = self.contains( trajectory.getPoints() )
 
             is_inside = list( is_inside ) + [ not( is_inside[-1] ) ]
 
@@ -199,12 +217,23 @@ class domain :
                     cut = is_inside.index( not( is_inside[0] ) )
 
                     if is_inside[0] :
-                        inside += [ traj[:cut] ]
+                        inside += [ trajectory[:cut] ]
                     else :
-                        outside += [ traj[:cut] ]
+                        outside += [ trajectory[:cut] ]
 
                     is_inside = is_inside[cut:]
-                    traj = traj[cut:]
+                    trajectory = trajectory[cut:]
 
                 except :
                     return inside, outside
+
+        except : # argument is a list of trajectories
+
+            for trajectory in trajectory :
+
+                new_inside, new_outside = self.cookie_cutter( trajectory )
+
+                inside += new_inside
+                outside += new_outside
+
+            return inside, outside

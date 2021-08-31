@@ -93,16 +93,16 @@ figure( figsize = (6,3) )
 h = 0
 
 for traj in actual.live_trajectories :
-    plot( [ traj.birth_time, traj.end_time ], [h]*2 )
+    plot( [ traj.birth_time, traj.getEndTime() ], [h]*2 )
     h += 1
 
 
 for traj in tracker.live_trajectories :
-    plot( [ traj.birth_time, traj.end_time ], [h]*2, ':k' )
+    plot( [ traj.birth_time, traj.getEndTime() ], [h]*2, ':k' )
     h += 1
 
 for traj in tracker.dead_trajectories :
-    plot( [ traj.birth_time, traj.end_time ], [h]*2, ':', color = 'grey' )
+    plot( [ traj.birth_time, traj.getEndTime() ], [h]*2, ':', color = 'grey' )
     h += 1
 
 yticks([])

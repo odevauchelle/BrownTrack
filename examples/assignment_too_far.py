@@ -35,7 +35,7 @@ for ax in axs :
     ax.set_xticks([])
     ax.set_yticks([])
 
-savefig(figure_path + 'assignment_too_far.svg', bbox_inches = 'tight' )
+# savefig(figure_path + 'assignment_too_far.svg', bbox_inches = 'tight' )
 
 
 show()

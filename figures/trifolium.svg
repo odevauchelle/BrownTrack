@@ -27,7 +27,7 @@ z
 " style="fill:#ffffff;"/>
    </g>
    <g id="patch_3">
-    <path clip-path="url(#p7dcc770584)" d="M 240.376654 143.756 
+    <path clip-path="url(#p34ab420976)" d="M 240.376654 143.756 
 L 197.250924 54.204498 
 L 100.348287 32.087103 
 L 22.638406 94.058666 
@@ -41,7 +41,7 @@ z
    <g id="matplotlib.axis_1"/>
    <g id="matplotlib.axis_2"/>
    <g id="line2d_1">
-    <path clip-path="url(#p7dcc770584)" d="M 261.406516 136.651049 
+    <path clip-path="url(#p34ab420976)" d="M 261.406516 136.651049 
 L 255.841458 130.091874 
 L 246.795984 124.597818 
 L 234.60445 120.636549 
@@ -125,7 +125,7 @@ L 273.344921 10.7
   </g>
  </g>
  <defs>
-  <clipPath id="p7dcc770584">
+  <clipPath id="p34ab420976">
    <rect height="266.112" width="262.644921" x="10.7" y="10.7"/>
   </clipPath>
  </defs>

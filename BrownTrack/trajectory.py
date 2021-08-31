@@ -27,7 +27,7 @@ class trajectory :
     birth_time : Starting time of the trajectory.
     '''
 
-    def __init__( self, birth_time = 0, X = None, mummy = None, points = None ) :
+    def __init__( self, X = None, birth_time = 0, mummy = None, points = None ) :
 
         '''
         Create a trajectory.
@@ -70,7 +70,7 @@ class trajectory :
         time = range( len( self.x ) )[key]
 
         if type(key) == int : # returns only a point
-            return self.birth_time + time, ( self.x[key], self.y[key])
+            return ( self.x[key], self.y[key]), self.birth_time + time
 
         else :
             return trajectory( points = self.getPoints()[key], birth_time = self.birth_time + time[0] )

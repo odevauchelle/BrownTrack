@@ -161,6 +161,18 @@ class domain :
 
 
     def cookie_cutter( self, trajectories = None ) :
+        '''
+        Split trajectories into inside and outside pieces. The resulting pieces are themselves trajectories.
+
+        inside, outside = cookie_cutter( trajectories = None )
+
+        Parameters:
+        trajectories: A trajectory or a list of trajectories.
+
+        Output:
+        inside : A list of trajectories inside the domain.
+        inside : A list of trajectories outside the domain.
+        '''
 
         if trajectories is None :
             trajectories = []

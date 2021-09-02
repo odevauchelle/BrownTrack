@@ -102,9 +102,9 @@ sigma_time, sigma_r2 = data.apply( std )
 nb = data.nb
 error_time, error_r2 = sigma_time/sqrt( nb ), sigma_r2/sqrt( nb )
 ```
-The result looks like this
+The result looks like this:
 ```python
-errorbar( time, r2, sigma_r2, sigma_time, 'o' )
+errorbar( time, r2, sigma_r2, sigma_time, 'o', label = 'Binned data' )
 ax_std.plot( time, epsilon**2*time, '--', color = std_color, label = 'Theory' )
 ```
 ![Diffusivity](../figures/diffusivity_std_th.svg)

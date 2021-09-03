@@ -21,9 +21,20 @@ gca().add_patch( domain.get_patch() )
 
 A domain can also be bounded by a polygon:
 ```python
+theta = linspace(0,2*pi, 8 )
 domain = BT.domain( 'Polygon', { 'xy' : array( [ cos(theta), sin(theta) ] ).T  } )
 ```
 ![Polygon](../figures/domain_2.svg)
+
+We can compute the area of the domain:
+```python
+
+print( domain.get_area() )
+```
+```console
+>>> 2.7364101886381045
+```
+
 
 ## Cookie cutter
 

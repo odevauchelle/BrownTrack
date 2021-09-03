@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from copy import deepcopy
 # from shapely.geometry import Point, Polygon
 import matplotlib.path as mplPath
+from shapely.geometry import Polygon as shapely_Polygon
 
 # from .trajectory import trajectory
 
@@ -164,6 +165,13 @@ class domain :
         else :
             self.boundary = old_boundary
             return False
+
+    def get_area( self ) :
+        if self.patch_type == 'Circle' :
+            return np.pi*self.boundary['radius']**2
+
+        elif self.patch_type == 'Polygon' :
+            return shapely_Polygon( self.boundary['xy'] ).area
 
     def contains( self, points ) :
         '''

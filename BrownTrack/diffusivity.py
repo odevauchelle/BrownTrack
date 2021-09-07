@@ -22,7 +22,7 @@ def dispersion( trajectories ) :
     for traj in trajectories :
 
         time = np.arange( len( traj.x ) )
-        r2 = ( traj.x - traj.x[0] )**2 + ( traj.y - traj.y[0] )**2
+        r2 = ( np.array( traj.x ) - traj.x[0] )**2 + ( np.array( traj.y ) - traj.y[0] )**2
 
         time = time[1:]
         r2 = r2[1:]

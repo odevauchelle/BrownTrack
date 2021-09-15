@@ -164,14 +164,17 @@ class bunch :
 
     def addTrajectory( self, trajectories ) :
 
-        if type(trajectories) == list :
+        try :
             self.live_trajectories += trajectories
 
-        elif isinstance(trajectories, trajectory) :
-            self.live_trajectories += [ trajectories ]
+        except :
+            
+            if isinstance( trajectories, trajectory ) :
+                self.addTrajectory( [ trajectories ] )
 
-        else :
-            print('This is not a trajectory or a list of trajectories.')
+            else :
+                self.addTrajectory( load_trajectories( the_file ) )
+
 
     def getEnds( self ) :
 

@@ -7,7 +7,7 @@ def dispersion( trajectories ) :
     Transforms a list of trajectories into a cloud of points, in the coordinates (time, r**2), where r is the distance to the starting point of each trajectory.
     The first point, of coordinate (0,0), is omitted from the output.
 
-    time, r2 = radial_spread( trajectories )
+    time, r2 = dispersion( trajectories )
 
     Arguments :
     trajectories : A list of trajectories.
@@ -29,4 +29,7 @@ def dispersion( trajectories ) :
 
         time_r2 += list( np.array( [ time, r2 ] ).T )
 
-    return np.array( time_r2 ).T
+    if time_r2 == [] :
+        return [ np.array([]) ]*2
+    else :
+        return np.array( time_r2 ).T

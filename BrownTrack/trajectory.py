@@ -65,6 +65,12 @@ class trajectory :
     def getPoints( self ) :
         return list( array( [ self.x, self.y ] ).T )
 
+    def getTrajectoryAtTime( self, time ) :
+
+        selection = self.birth_time + arange( len( self.x ) ) <= time
+
+        return trajectory( X = ( list( array(self.x)[selection] ), list( array(self.y)[selection]) ), birth_time = self.birth_time )
+
     def __getitem__( self, key ) : #  slicing
 
         time = range( len( self.x ) )[key]
@@ -164,16 +170,14 @@ class bunch :
 
     def addTrajectory( self, trajectories ) :
 
-        try :
+        if type( trajectories ) == list :
             self.live_trajectories += trajectories
 
-        except :
-            
-            if isinstance( trajectories, trajectory ) :
-                self.addTrajectory( [ trajectories ] )
+        elif isinstance( trajectories, trajectory ) :
+            self.addTrajectory( [ trajectories ] )
 
-            else :
-                self.addTrajectory( load_trajectories( the_file ) )
+        else :
+            self.addTrajectory( load_trajectories( trajectories ) )
 
 
     def getEnds( self ) :
@@ -185,19 +189,17 @@ class bunch :
 
         return end_points
 
-    def kill( self, kill_list ) :
+    def kill( self, traj ) :
 
-        killed_trajectories = []
-        surviving_trajectories = []
+        if type(traj) == int : # traj is the index of the trajectory
+            self.dead_trajectories += [ self.live_trajectories.pop( traj ) ]
 
-        for n in range( len(self.live_trajectories) ) :
-            if n in kill_list :
-                killed_trajectories += [self.live_trajectories[n]]
-            else :
-                surviving_trajectories += [self.live_trajectories[n]]
+        elif isinstance( traj, trajectory ) : # traj is the trajectory
+                self.kill( self.live_trajectories.index( traj ) )
 
-        self.live_trajectories = surviving_trajectories
-        self.dead_trajectories += killed_trajectories
+        else : # traj is a list of indices or trajectories
+            for traj in traj :
+                self.kill( traj )
 
     def undertake( self ) :
         self.dead_trajectories = []

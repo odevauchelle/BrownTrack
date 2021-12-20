@@ -191,15 +191,17 @@ class bunch :
 
     def kill( self, traj ) :
 
-        if type(traj) == int : # traj is the index of the trajectory
+        try : # traj is the index of the trajectory
+            traj = int(traj)
             self.dead_trajectories += [ self.live_trajectories.pop( traj ) ]
 
-        elif isinstance( traj, trajectory ) : # traj is the trajectory
+        except :
+            try :# traj is the trajectory
                 self.kill( self.live_trajectories.index( traj ) )
 
-        else : # traj is a list of indices or trajectories
-            for traj in traj :
-                self.kill( traj )
+            except : # traj is a list of indices or trajectories
+                for traj in traj :
+                    self.kill( traj )
 
     def undertake( self ) :
         self.dead_trajectories = []

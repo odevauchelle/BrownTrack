@@ -2,7 +2,7 @@
 import sys
 sys.path.append('./../')
 
-figure_path = '../figures/'
+figure_path = './'
 
 import BrownTrack as BT
 from pylab import *
@@ -38,7 +38,6 @@ for t in range(150) :
             population.addTrajectory( BT.trajectory( X = traj.getEnd(), birth_time = t ) )
 
     ########## Death
-
     population.kill( where( rand( len( population.live_trajectories ) ) < .01 )[0] )
 
 live_color = 'tab:blue'
@@ -64,11 +63,11 @@ figure( figsize = (6,3) )
 h = 0
 
 for traj in population.dead_trajectories :
-    plot( [ traj.birth_time, traj.end_time ], [h]*2, dead_color )
+    plot( [ traj.birth_time, traj.getEndTime() ], [h]*2, dead_color )
     h += 1
 
 for traj in population.live_trajectories :
-    plot( [ traj.birth_time, traj.end_time ], [h]*2, live_color )
+    plot( [ traj.birth_time, traj.getEndTime() ], [h]*2, live_color )
     h += 1
 
 yticks([])

@@ -1,3 +1,23 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+# Olivier Devauchelle, 2021
+#
+# Based on a library initially developped by O.~Devauchelle, A.~Abramian & E.~Lajeunesse with the help of J.~Heyman
+
 from pylab import *
 import json
 
@@ -109,6 +129,28 @@ class trajectory :
             return [ self.birth_time, array( self.x ).tolist(), array( self.y ).tolist() ]
         else :
             return [ self.birth_time, self.x, self.y ]
+
+    def diff(self) :
+        '''
+        Returns the corresponding trajectory in the velocity space. See trajectory.diff_companion.
+
+        The resulting trajectory contains one less point. It birth time is that of the original trajectory plus 0.5.
+        '''
+        return trajectory( mummy = ( self.birth_time + .5, diff( self.x ), diff( self.y ) ) )
+
+    def diff_companion(self) :
+        '''
+        Returns the corresponding trajectory on each midpoint. See trajectory.diff.
+
+        The resulting trajectory contains one less point. It birth time is that of the original trajectory plus 0.5.
+        '''
+        x = np.array( self.x )
+        y = np.array( self.y )
+        return trajectory( mummy = ( self.birth_time + .5, (x[1:] + x[:-1])/2, (y[1:] + y[:-1])/2 ) )
+
+    def get_time_list( self ) :
+        return list( self.birth_time + arange( len( self.x ) ) )
+
 
 def load_trajectories( traj_file, max_number_of_trajectories = inf, theta = None ) :
 

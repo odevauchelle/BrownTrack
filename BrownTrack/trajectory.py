@@ -85,6 +85,9 @@ class trajectory :
     def getPoints( self ) :
         return list( array( [ self.x, self.y ] ).T )
 
+    def getxy( self ) :
+        return array(self.x), array( self.y )
+
     def getTrajectoryAtTime( self, time ) :
 
         selection = self.birth_time + arange( len( self.x ) ) <= time

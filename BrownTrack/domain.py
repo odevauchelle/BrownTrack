@@ -167,7 +167,7 @@ class domain :
             self.boundary = dict( xy = plt.ginput( -1, timeout = timeout ) )
 
         elif self.patch_type == 'Circle' :
-            center, radius = CircumscribedCircle( plt.ginput( 3, timeout = timeout ) )
+            center, radius = CircumscribedCircle( plt.ginput( -1, timeout = timeout ) )
             self.boundary = dict( xy = center, radius = radius )
 
         boundary_patch = self.get_patch( **ginput_style )

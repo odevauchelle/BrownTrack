@@ -194,6 +194,30 @@ class domain :
         elif self.patch_type == 'Polygon' :
             return shapely_Polygon( self.boundary['xy'] ).area
 
+    def get_barycenter( self ) :
+        '''
+        Get the surface barycenter of a domain.
+
+        xb, yb = domain.get_barycenter()
+        '''
+
+        if self.patch_type == 'Circle' :
+            return self.boundary['xy'] # just the center
+
+        elif self.patch_type == 'Polygon' :
+
+
+            x, y = np.array( self.boundary['xy'] ).T
+            z = x + 1j*y
+            n_ds = -1j*np.diff(z)
+            r2 = np.abs( z )**2
+            r2 = ( r2[1:] + r2[:-1] )/2
+            
+            zb = sum( r2*n_ds )/( 2*self.get_area() )
+
+            return np.real(zb), np.imag(zb)
+
+
     def contains( self, points ) :
         '''
         Whether points are inside domain.

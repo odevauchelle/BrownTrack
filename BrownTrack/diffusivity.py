@@ -21,34 +21,43 @@
 
 import numpy as np
 
-def dispersion( trajectories ) :
+def dispersion( trajectories, with_velocities = False ) :
     '''
     Transforms a list of trajectories into a cloud of points, in the coordinates (time, r**2), where r is the distance to the starting point of each trajectory.
     The first point, of coordinate (0,0), is omitted from the output.
 
-    time, r2 = dispersion( trajectories )
+    time, r2 = dispersion( trajectories, with_velocities = False )
+    time, r2, u, v = dispersion( trajectories, with_velocities = True )
 
     Arguments :
     trajectories : A list of trajectories.
+    with_velocities (boolean) : Whether to calculate velocities as well
 
     Output :
     time : A time list. Time is set to zero at the beginning of each trajectory.
     r2 : A list of r**2, where r is the distance to the starting point of each trajectory.
+    u, v (optional) : Two lists of velocities.
     '''
 
-    time_r2 = []
+    output = []
 
     for traj in trajectories :
 
         time = np.arange( len( traj.x ) )
         r2 = ( np.array( traj.x ) - traj.x[0] )**2 + ( np.array( traj.y ) - traj.y[0] )**2
 
-        time = time[1:]
-        r2 = r2[1:]
+        additional_ouput = [ time[1:], r2[1:] ]
 
-        time_r2 += list( np.array( [ time, r2 ] ).T )
+        if with_velocities :
+            dt = np.diff(time)
+            additional_ouput += [ np.diff( traj.x )/dt, np.diff( traj.y )/dt ]
 
-    if time_r2 == [] :
-        return [ np.array([]) ]*2
+        output += list( np.array( additional_ouput ).T )
+
+    if output == [] :
+        if with_velocities :
+            return [ np.array([]) ]*4
+        else :
+            return [ np.array([]) ]*2
     else :
-        return np.array( time_r2 ).T
+        return np.array( output ).T

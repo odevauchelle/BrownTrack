@@ -10,12 +10,15 @@ from pylab import *
 # domain = BT.domain( 'Circle', { 'xy' : ( 0, 0 ), 'radius' : 1  } )
 #
 theta = linspace(0,2*pi, 100 )[::-1]
-domain = BT.domain( 'Polygon', { 'xy' : array( [ 0.5*cos(theta), ( 1 - 0.8*cos(3*theta) )*sin(theta) ] ).T  } )
+domain = BT.domain( 'Polygon', { 'xy' : ( array( [ cos(theta)*(1+sin(theta)), sin(theta)] ) ).T  } )
 
 print('area:', domain.get_area() )
 
-gca().add_patch( domain.get_patch() )
-plot(*domain.get_barycenter(),'+')
+patch = domain.get_patch()
+patch.set( facecolor = 'tab:blue', alpha = .5 )
+gca().add_patch( patch )
+plot(0,0,'+', color = 'k')
+plot(*domain.get_barycenter(),'+', color = 'tab:red')
 
 
 axis('scaled')

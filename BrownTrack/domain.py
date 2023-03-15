@@ -196,7 +196,7 @@ class domain :
 
     def get_barycenter( self ) :
         '''
-        Get the surface barycenter of a domain. Yields an approximate result, valid for smooth, non-intersecting boundary.
+        Get the surface barycenter of a domain (centroid). Uses Shapely.
 
         xb, yb = domain.get_barycenter()
         '''
@@ -206,16 +206,7 @@ class domain :
 
         elif self.patch_type == 'Polygon' :
 
-
-            x, y = np.array( self.boundary['xy'] ).T
-            z = x + 1j*y
-            n_ds = 1j*np.diff(z)
-            r2 = np.abs( z )**2
-            r2 = ( r2[1:] + r2[:-1] )/2
-
-            zb = ( 1/2 )*sum( r2*n_ds )/self.get_area()
-
-            return np.real(zb), np.imag(zb)
+            return list( shapely_Polygon( self.boundary['xy'] ).centroid.coords[0] )
 
 
     def contains( self, points ) :

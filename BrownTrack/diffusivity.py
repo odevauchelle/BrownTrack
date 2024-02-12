@@ -61,3 +61,18 @@ def dispersion( trajectories, with_velocities = False ) :
             return [ np.array([]) ]*2
     else :
         return np.array( output ).T
+
+
+def diffusivity_CVE( x, dt = 1. ) :
+    
+    '''
+    D = get_diffusivity( x, dt = 1. )
+
+    Covariance-based estimator for diffusivity.
+
+    Vestergaard, C. L., Blainey, P. C., & Flyvbjerg, H. (2014). Optimal estimation of diffusion coefficients from single-particle trajectories. Physical Review E, 89(2), 022726.
+    '''
+
+    dx = np.diff( x )
+
+    return ( np.mean( dx**2 )/2 + np.mean( dx[1:]*dx[:-1] ) )/dt

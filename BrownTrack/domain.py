@@ -239,7 +239,7 @@ class domain :
         inside, outside = cookie_cutter( trajectories = None )
 
         Parameters:
-        trajectories: A trajectory or a list of trajectories.
+        trajectory: A trajectory or a list of trajectories.
 
         Output:
         inside : A list of trajectories inside the domain.

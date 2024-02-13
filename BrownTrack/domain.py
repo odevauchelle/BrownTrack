@@ -246,7 +246,7 @@ class domain :
 
         elif self.patch_type == 'Polygon' :
             xy_center = self.get_barycenter()
-            self.boundary['xy'] = xy_center + expansion_factor*( self.boundary['xy'] - xy_center )
+            self.boundary['xy'] = list( np.array( xy_center ) + expansion_factor*( np.array( self.boundary['xy'] ) - np.array( xy_center ) ) )
 
     def cookie_cutter( self, trajectory ) :
         '''

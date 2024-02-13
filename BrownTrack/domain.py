@@ -231,6 +231,22 @@ class domain :
             path = mplPath.Path( self.boundary['xy'] )
             return path.contains_points( points )
 
+    def resize( self, expansion_factor ) :
+        '''
+        Resize domain homotetically, with respect to the barycenter.
+
+        domain.resize( expansion_factor )
+
+        Parameters:
+            expansion_factor (float) : scaling factor for the domain
+        '''
+
+        if self.patch_type == 'Circle' :
+            self.boundary['radius'] *= expansion_factor
+
+        elif self.patch_type == 'Polygon' :
+            xy_center = self.get_barycenter()
+            self.boundary['xy'] = xy_center + expansion_factor*( self.boundary['xy'] - xy_center )
 
     def cookie_cutter( self, trajectory ) :
         '''

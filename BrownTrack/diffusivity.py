@@ -64,11 +64,18 @@ def dispersion( trajectories, with_velocities = False ) :
 
 
 def diffusivity_CVE( x, dt = 1. ) :
-    
+
     '''
     D = get_diffusivity( x, dt = 1. )
 
     Covariance-based estimator for diffusivity.
+
+    Arguments:
+        x : one-dimensional series of positions
+        dt : time step (defaults to 1.)
+
+    Output:
+        D : estimate of diffusivity
 
     Vestergaard, C. L., Blainey, P. C., & Flyvbjerg, H. (2014). Optimal estimation of diffusion coefficients from single-particle trajectories. Physical Review E, 89(2), 022726.
     '''
@@ -76,3 +83,34 @@ def diffusivity_CVE( x, dt = 1. ) :
     dx = np.diff( x )
 
     return ( np.mean( dx**2 )/2 + np.mean( dx[1:]*dx[:-1] ) )/dt
+
+def diffusivity_2D( trajectories, **kwargs ) :
+
+    '''
+    Dx, Dy = diffusivity_2D( trajectories, dt = 1. )
+
+    Covariance-based estimator for diffusivity.
+
+    Arguments:
+        trajectories : a list of two-dimensional trajectories
+        dt : time step (defaults to 1.)
+
+    Output:
+        Dx, Dy : estimates of diffusivity along x and y
+    '''
+
+    Dx = []
+    Dy = []
+
+    for trajectory in trajectories :
+        Dx += [ diffusivity_CVE( trajectory.x, **kwargs ) ]
+        Dy += [ diffusivity_CVE( trajectory.y, **kwargs ) ]
+
+    return Dx, Dy
+
+
+if __name__ == '__main__' :
+
+    from numpy.random import normal
+
+    print( diffusivity_CVE( np.cumsum( normal( size = 1000 ) ) )  )

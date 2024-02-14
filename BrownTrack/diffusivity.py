@@ -21,17 +21,18 @@
 
 import numpy as np
 
-def dispersion( trajectories, with_velocities = False ) :
+def dispersion( trajectories, with_velocities = False, cutoff = None ) :
     '''
     Transforms a list of trajectories into a cloud of points, in the coordinates (time, r**2), where r is the distance to the starting point of each trajectory.
     The first point, of coordinate (0,0), is omitted from the output.
 
-    time, r2 = dispersion( trajectories, with_velocities = False )
-    time, r2, u, v = dispersion( trajectories, with_velocities = True )
+    time, r2 = dispersion( trajectories, with_velocities = False, cutoff = None )
+    time, r2, u, v = dispersion( trajectories, with_velocities = True, cutoff = None )
 
     Arguments :
     trajectories : A list of trajectories.
     with_velocities (boolean) : Whether to calculate velocities as well
+    cutoff (float): whether to slice the data, and the size of slices.
 
     Output :
     time : A time list. Time is set to zero at the beginning of each trajectory.
@@ -43,27 +44,49 @@ def dispersion( trajectories, with_velocities = False ) :
 
     for traj in trajectories :
 
-        time = np.arange( len( traj.x ) )
-        r2 = ( np.array( traj.x ) - traj.x[0] )**2 + ( np.array( traj.y ) - traj.y[0] )**2
+        if not cutoff is None :
+            number_of_slices = int( round( len(traj.x)/cutoff ) )
 
-        additional_ouput = [ time[1:], r2[1:] ]
+        else :
+            number_of_slices = 0
 
-        if with_velocities :
-            dt = np.diff(time)
-            additional_ouput += [ np.diff( traj.x )/dt, np.diff( traj.y )/dt ]
+        if number_of_slices > 0 :
+            x_list = np.array_split( traj.x, number_of_slices )
+            y_list = np.array_split( traj.y, number_of_slices )
 
-        output += list( np.array( additional_ouput ).T )
+        else :
+            x_list = [traj.x]
+            y_list = [traj.y]
+
+        for i in range(len(x_list)) :
+
+            x = x_list[i]
+            y = y_list[i]
+            
+            time = np.arange( len( x ) )
+            r2 = ( np.array( x ) - x[0] )**2 + ( np.array( y ) - y[0] )**2
+
+            additional_ouput = [ time[1:], r2[1:] ]
+
+            if with_velocities :
+                dt = np.diff(time)
+                additional_ouput += [ np.diff( x )/dt, np.diff( y )/dt ]
+
+            output += list( np.array( additional_ouput ).T )
 
     if output == [] :
+
         if with_velocities :
             return [ np.array([]) ]*4
+        
         else :
             return [ np.array([]) ]*2
+    
     else :
         return np.array( output ).T
 
 
-def diffusivity_CVE( x, dt = 1. ) :
+def diffusivity_CVE( x = None, dx = None, dt = 1. ) :
 
     '''
     D = get_diffusivity( x, dt = 1. )
@@ -80,7 +103,11 @@ def diffusivity_CVE( x, dt = 1. ) :
     Vestergaard, C. L., Blainey, P. C., & Flyvbjerg, H. (2014). Optimal estimation of diffusion coefficients from single-particle trajectories. Physical Review E, 89(2), 022726.
     '''
 
-    dx = np.diff( x )
+    if dx is None :
+        dx = np.diff( x )
+
+    else :
+        dx = np.array(dx)
 
     return ( np.mean( dx**2 )/2 + np.mean( dx[1:]*dx[:-1] ) )/dt
 
@@ -99,18 +126,18 @@ def diffusivity_2D( trajectories, **kwargs ) :
         Dx, Dy : estimates of diffusivity along x and y
     '''
 
-    Dx = []
-    Dy = []
+    dx = []
+    dy = []
 
     for trajectory in trajectories :
-        Dx += [ diffusivity_CVE( trajectory.x, **kwargs ) ]
-        Dy += [ diffusivity_CVE( trajectory.y, **kwargs ) ]
+        dx += np.diff( trajectory.x ).tolist()
+        dy += np.diff( trajectory.y ).tolist()
 
-    return Dx, Dy
+    return diffusivity_CVE( dx = dx, **kwargs ), diffusivity_CVE( dx = dy, **kwargs )
 
 
 if __name__ == '__main__' :
 
     from numpy.random import normal
 
-    print( diffusivity_CVE( np.cumsum( normal( size = 1000 ) ) )  )
+    print( 'Should be 0.5:', diffusivity_CVE( np.cumsum( normal( size = 1000 ) ) )  )

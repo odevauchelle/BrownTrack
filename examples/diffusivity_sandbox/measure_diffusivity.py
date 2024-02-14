@@ -9,12 +9,6 @@ import BrownTrack as BT
 sys.path.append('/home/olivier/git/bindata')
 from bindata import bindata
 
-
-
-
-
-
-
 ##################
 #
 # load data
@@ -87,42 +81,30 @@ trajectories['quick'], trajectories['slow'] = domains['inner'].cookie_cutter( al
 domains['inner'].boundary['radius'] += 2*max(p['dxs']) + 2*min(p['dxs'])
 _, trajectories['slow'] = domains['inner'].cookie_cutter( trajectories['slow'] )
 
+cutoff = 10
 
 for name, trajectories_ in trajectories.items() :
 
-    D[name] = dict( x = [], y = [] )
-    sigma_2[name] = []
-    t[name] = []
+   
+    t[name], sigma_2[name] = bindata( *BT.dispersion( trajectories_, cutoff = cutoff ), nbins = cutoff+1 ).apply()
+
+    D[name] = {}
+    
+    D[name]['x'], D[name]['y'] = BT.diffusivity_2D( trajectories_ )
+    
+    ax_D.plot( t[name], sigma_2[name], 'o', color = colors[name] )
 
     for trajectory in trajectories_ :
-
-        if len( trajectory.x ) > 2 :
-            
-            sigma_2[name] += ( ( array( trajectory.x ) - trajectory.x[0] )**2 + ( array( trajectory.y ) - trajectory.y[0] )**2 ).tolist()
-            t[name] += arange( len( trajectory.x ) ).tolist()
-            
-            D[name]['x'] += [ BT.diffusivity_CVE( trajectory.x ) ]
-            D[name]['y'] += [ BT.diffusivity_CVE( trajectory.y ) ]
-
         ax_phys.plot( trajectory.x, trajectory.y, color = colors[name], lw = 1, alpha = .2, label = name )
-    
-    print(D)
 
-    time, sigma_2[name] = bindata( t[name], sigma_2[name], nbins = 20 ).apply()
-
-    ax_D.plot( time, sigma_2[name], 'o', color = colors[name] )
 
     for dim in ['x', 'y' ] :
-        D[name][dim] = mean( D[name][dim] )
-        ax_D.plot( time, 4*D[name][dim]*time, '--', color = colors[name] )
+        # D[name][dim] = nanmean( D[name][dim] )
+        ax_D.plot( t[name], 4*D[name][dim]*t[name], '--', color = colors[name] )
 
 
 print( 'measured', D)
 print( 'theory', array(p['dxs'])**2/array(p['dts'])/2 )
-
-
-
-
 
 #####################
 #

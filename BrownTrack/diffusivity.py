@@ -111,19 +111,22 @@ def diffusivity_CVE( x = None, dx = None, dt = 1. ) :
 
     return ( np.mean( dx**2 )/2 + np.mean( dx[1:]*dx[:-1] ) )/dt
 
-def diffusivity_2D( trajectories, **kwargs ) :
+def diffusivity_2D( trajectories, bootstrap = None, **kwargs ) :
 
     '''
-    Dx, Dy = diffusivity_2D( trajectories, dt = 1. )
+    Dx, Dy = diffusivity_2D( trajectories, bootstrap = None, dt = 1. )
 
     Covariance-based estimator for diffusivity.
 
     Arguments:
         trajectories : a list of two-dimensional trajectories
+        bootstrap : if an integer, repeats the procedure on bootsrap slices of the data, and outputs the estimated error (defaults to None)
         dt : time step (defaults to 1.)
 
     Output:
         Dx, Dy : estimates of diffusivity along x and y
+        Dx, Dy, std_Dx, std_Dy : diffusivity along x and y, and estimated error (if bootstratp isn't None)
+
     '''
 
     dx = []
@@ -133,7 +136,17 @@ def diffusivity_2D( trajectories, **kwargs ) :
         dx += np.diff( trajectory.x ).tolist()
         dy += np.diff( trajectory.y ).tolist()
 
-    return diffusivity_CVE( dx = dx, **kwargs ), diffusivity_CVE( dx = dy, **kwargs )
+    Dx, Dy = diffusivity_CVE( dx = dx, **kwargs ), diffusivity_CVE( dx = dy, **kwargs )
+
+    if bootstrap is None :
+        return Dx, Dy
+    
+    else :
+
+        std_Dx = np.std( [ diffusivity_CVE( dx = dx, **kwargs ) for dx in np.array_split( dx, bootstrap ) ] )/bootstrap
+        std_Dy = np.std( [ diffusivity_CVE( dx = dy, **kwargs ) for dy in np.array_split( dy, bootstrap ) ] )/bootstrap
+
+        return Dx, Dy, std_Dx, std_Dy
 
 
 if __name__ == '__main__' :

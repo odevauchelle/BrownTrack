@@ -21,7 +21,8 @@
 
 import numpy as np
 
-def dispersion( trajectories, with_velocities = False, cutoff = None ) :
+
+def dispersion( trajectories, with_velocities = False, cutoff = None, dim = None ) :
     '''
     Transforms a list of trajectories into a cloud of points, in the coordinates (time, r**2), where r is the distance to the starting point of each trajectory.
     The first point, of coordinate (0,0), is omitted from the output.
@@ -40,6 +41,12 @@ def dispersion( trajectories, with_velocities = False, cutoff = None ) :
     u, v (optional) : Two lists of velocities.
     '''
 
+    if dim is None :
+        dim = ['x','y']
+
+    elif type(dim) == type('') :
+        dim = [ dim ]
+
     output = []
 
     for traj in trajectories :
@@ -50,37 +57,50 @@ def dispersion( trajectories, with_velocities = False, cutoff = None ) :
         else :
             number_of_slices = 0
 
+        position = {}
+
         if number_of_slices > 0 :
-            x_list = np.array_split( traj.x, number_of_slices )
-            y_list = np.array_split( traj.y, number_of_slices )
+            for d in dim :
+                position[d] = np.array_split( traj.__dict__[d], number_of_slices )
 
         else :
-            x_list = [traj.x]
-            y_list = [traj.y]
+            for d in dim :
+                position[d] = [ traj.__dict__[d] ]
 
-        for i in range(len(x_list)) :
+        for i in range( len( position[ dim[0] ] ) ) :
 
-            x = x_list[i]
-            y = y_list[i]
+            time = np.arange( len( position[ dim[0] ][i] ) )
             
-            time = np.arange( len( x ) )
-            r2 = ( np.array( x ) - x[0] )**2 + ( np.array( y ) - y[0] )**2
-
-            additional_ouput = [ time[1:], r2[1:] ]
-
             if with_velocities :
                 dt = np.diff(time)
-                additional_ouput += [ np.diff( x )/dt, np.diff( y )/dt ]
+
+            for i_d,d in enumerate( dim ) :
+
+                x = position[d][i]
+
+                
+                if i_d == 0 :        
+                    r2 = ( np.array( x ) - x[0] )**2
+
+                else :
+                    r2 += ( np.array( x ) - x[0] )**2
+
+                if with_velocities :
+
+                    additional_ouput += [ np.diff( x )/dt ]
+            
+            
+            additional_ouput = [ time[1:], r2[1:] ]
 
             output += list( np.array( additional_ouput ).T )
 
     if output == [] :
 
         if with_velocities :
-            return [ np.array([]) ]*4
+            return [ np.array([]) ]*len(dim)*2
         
         else :
-            return [ np.array([]) ]*2
+            return [ np.array([]) ]*len(dim)
     
     else :
         return np.array( output ).T
@@ -111,7 +131,7 @@ def diffusivity_CVE( x = None, dx = None, dt = 1. ) :
 
     return ( np.mean( dx**2 )/2 + np.mean( dx[1:]*dx[:-1] ) )/dt
 
-def diffusivity_2D( trajectories, bootstrap = None, **kwargs ) :
+def diffusivity_2D( trajectories, bootstrap = None, downsampling = None, **kwargs ) :
 
     '''
     Dx, Dy = diffusivity_2D( trajectories, bootstrap = None, dt = 1. )
@@ -120,31 +140,38 @@ def diffusivity_2D( trajectories, bootstrap = None, **kwargs ) :
 
     Arguments:
         trajectories : a list of two-dimensional trajectories
-        bootstrap : if an integer, repeats the procedure on bootsrap slices of the data, and outputs the estimated error (defaults to None)
+        bootstrap : if an integer, repeats the procedure on bootsrap slices of the data, and outputs the dispersion (defaults to None)
         dt : time step (defaults to 1.)
 
     Output:
         Dx, Dy : estimates of diffusivity along x and y
-        Dx, Dy, std_Dx, std_Dy : diffusivity along x and y, and estimated error (if bootstratp isn't None)
+        Dx, Dy, std_Dx, std_Dy : diffusivity along x and y, and dispersion (if bootstratp isn't None)
 
     '''
 
     dx = []
     dy = []
 
-    for trajectory in trajectories :
-        dx += np.diff( trajectory.x ).tolist()
-        dy += np.diff( trajectory.y ).tolist()
+    if downsampling is None :
+        downsampling = 1
 
-    Dx, Dy = diffusivity_CVE( dx = dx, **kwargs ), diffusivity_CVE( dx = dy, **kwargs )
+    for trajectory in trajectories :
+        dx += np.diff( trajectory.x[::downsampling] ).tolist()
+        dy += np.diff( trajectory.y[::downsampling] ).tolist()
 
     if bootstrap is None :
-        return Dx, Dy
+        return diffusivity_CVE( dx = dx, **kwargs )/downsampling, diffusivity_CVE( dx = dy, **kwargs )/downsampling
     
     else :
 
-        std_Dx = np.std( [ diffusivity_CVE( dx = dx, **kwargs ) for dx in np.array_split( dx, bootstrap ) ] )/bootstrap
-        std_Dy = np.std( [ diffusivity_CVE( dx = dy, **kwargs ) for dy in np.array_split( dy, bootstrap ) ] )/bootstrap
+        Dx = [ diffusivity_CVE( dx = dx, **kwargs ) for dx in np.array_split( dx, bootstrap ) ]
+        Dy = [ diffusivity_CVE( dx = dy, **kwargs ) for dy in np.array_split( dy, bootstrap ) ]
+
+        std_Dx = np.std( Dx )/downsampling
+        std_Dy = np.std( Dy )/downsampling
+
+        Dx = np.mean( Dx )/downsampling
+        Dy = np.mean( Dy )/downsampling
 
         return Dx, Dy, std_Dx, std_Dy
 

@@ -90,7 +90,7 @@ for name, trajectories_ in trajectories.items() :
 
     D[name] = {}
     
-    D[name]['x'], D[name]['y'] = BT.diffusivity_2D( trajectories_ )
+    D[name]['x'], D[name]['y'] = BT.diffusivity_2D( trajectories_, downsampling=50 )
     
     ax_D.plot( t[name], sigma_2[name], 'o', color = colors[name] )
 

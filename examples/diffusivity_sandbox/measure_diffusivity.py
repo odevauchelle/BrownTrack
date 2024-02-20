@@ -80,14 +80,15 @@ domains['inner'].boundary['radius'] += 2*max(p['dxs']) + 2*min(p['dxs'])
 _, trajectories['slow'] = domains['inner'].cookie_cutter( trajectories['slow'] )
 
 cutoff = 10
-downsampling = 1
+downsampling = 10
+bootstrap = 10
 dim = 'xy'
 
 for name, trajectories_ in trajectories.items() :
    
     t, sigma_2 = bindata( *BT.dispersion( trajectories_, cutoff = cutoff, dim = dim ), nbins = cutoff+1 ).apply()
 
-    D['x'], D['y'] = BT.diffusivity_2D( trajectories_, downsampling = downsampling )
+    D['x'], D['y'], D['std_x'], D['std_y'] = BT.diffusivity_2D( trajectories_, downsampling = downsampling, bootstrap = bootstrap )
     
     ax_D.plot( t, sigma_2, 'o', color = colors[name] )
 

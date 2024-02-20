@@ -22,18 +22,19 @@
 import numpy as np
 
 
-def dispersion( trajectories, with_velocities = False, cutoff = None, dim = None ) :
+def dispersion( trajectories, with_velocities = False, cutoff = None, dim = 'xy' ) :
     '''
     Transforms a list of trajectories into a cloud of points, in the coordinates (time, r**2), where r is the distance to the starting point of each trajectory.
     The first point, of coordinate (0,0), is omitted from the output.
 
-    time, r2 = dispersion( trajectories, with_velocities = False, cutoff = None )
-    time, r2, u, v = dispersion( trajectories, with_velocities = True, cutoff = None )
+    time, r2 = dispersion( trajectories, with_velocities = False, cutoff = None, dim = 'xy' )
+    time, r2, u, v = dispersion( trajectories, with_velocities = True, cutoff = None, dim = 'xy' )
 
     Arguments :
     trajectories : A list of trajectories.
     with_velocities (boolean) : Whether to calculate velocities as well
     cutoff (float): whether to slice the data, and the size of slices.
+    dim : 'x', 'y' or 'xy' (the default), the dimension of interest
 
     Output :
     time : A time list. Time is set to zero at the beginning of each trajectory.
@@ -41,11 +42,7 @@ def dispersion( trajectories, with_velocities = False, cutoff = None, dim = None
     u, v (optional) : Two lists of velocities.
     '''
 
-    if dim is None :
-        dim = ['x','y']
-
-    elif type(dim) == type('') :
-        dim = [ dim ]
+    dim =  list(dim)
 
     output = []
 

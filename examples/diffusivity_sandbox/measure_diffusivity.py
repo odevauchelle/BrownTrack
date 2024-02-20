@@ -62,9 +62,7 @@ for name, domain in domains.items():
 #################
 
 trajectories = {}
-sigma_2 = {}
 D = {}
-t = {}
 
 colors = dict(quick = 'tab:orange', slow = 'tab:blue')
 
@@ -82,25 +80,22 @@ domains['inner'].boundary['radius'] += 2*max(p['dxs']) + 2*min(p['dxs'])
 _, trajectories['slow'] = domains['inner'].cookie_cutter( trajectories['slow'] )
 
 cutoff = 10
+downsampling = 1
+dim = 'xy'
 
 for name, trajectories_ in trajectories.items() :
-
    
-    t[name], sigma_2[name] = bindata( *BT.dispersion( trajectories_, cutoff = cutoff ), nbins = cutoff+1 ).apply()
+    t, sigma_2 = bindata( *BT.dispersion( trajectories_, cutoff = cutoff, dim = dim ), nbins = cutoff+1 ).apply()
 
-    D[name] = {}
+    D['x'], D['y'] = BT.diffusivity_2D( trajectories_, downsampling = downsampling )
     
-    D[name]['x'], D[name]['y'] = BT.diffusivity_2D( trajectories_, downsampling=50 )
-    
-    ax_D.plot( t[name], sigma_2[name], 'o', color = colors[name] )
+    ax_D.plot( t, sigma_2, 'o', color = colors[name] )
 
     for trajectory in trajectories_ :
         ax_phys.plot( trajectory.x, trajectory.y, color = colors[name], lw = 1, alpha = .2, label = name )
 
-
-    for dim in ['x', 'y' ] :
-        # D[name][dim] = nanmean( D[name][dim] )
-        ax_D.plot( t[name], 4*D[name][dim]*t[name], '--', color = colors[name] )
+    for local_dim in dim :
+        ax_D.plot( t, 2*len(dim)*D[local_dim]*t, '--', color = colors[name] )
 
 
 print( 'measured', D)

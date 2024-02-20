@@ -3,7 +3,7 @@ from numpy.random import normal
 from matplotlib.patches import Circle
 import json
 
-dxs = .03, .015 # space step
+dxs = .01, .005 # space step
 dts = 1., 1.
 inner_radius = .5
 # dts = 1., ( dxs[0]/dxs[1] )**2 # time step
@@ -29,7 +29,7 @@ walkers = [ array([0. + 0j]*nb_walkers ) ]
 min_diff_coef = 4*min( dxs )**2/max( dts )
 measurement_time = int( 1/min_diff_coef )
 
-nb_iterations = 2000
+nb_iterations = 10000
 
 print(measurement_time, nb_iterations)
 

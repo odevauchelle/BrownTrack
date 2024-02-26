@@ -33,8 +33,8 @@ for trajectory in p['walkers'] :
 print( b.getAllTrajectories()[0].x )
 
 domains = dict(
-    main = BT.domain( 'Circle', { 'xy' : ( 0, 0 ), 'radius' : 1  } ),
-    inner = BT.domain( 'Circle', { 'xy' : ( 0, 0 ), 'radius' : p['inner_radius']  } ),
+    slow = BT.domain( 'Circle', { 'xy' : ( 0, 0 ), 'radius' : 1  } ),
+    quick = BT.domain( 'Circle', { 'xy' : ( 0, 0 ), 'radius' : p['inner_radius']  } ),
 )
 
 ####################
@@ -47,7 +47,7 @@ fig, (ax_phys, ax_D) = subplots( ncols = 2, figsize = (8,4) )
 
 ax_phys.axis('scaled')
 ax_phys.axis('off')
-ax_phys.set_xlim( array([-1,1])*domains['main'].boundary['radius']*1.01 )
+ax_phys.set_xlim( array([-1,1])*domains['slow'].boundary['radius']*1.01 )
 ax_phys.set_ylim(ax_phys.get_xlim())
 
 for name, domain in domains.items():
@@ -66,23 +66,12 @@ D = {}
 
 colors = dict(quick = 'tab:orange', slow = 'tab:blue')
 
-domains['main'].boundary['radius'] -= 2*min(p['dxs'])
-all_trajectories, _ = domains['main'].cookie_cutter( b.getAllTrajectories() )
-
-#all_trajectories = b.getAllTrajectories()
-
-
-domains['inner'].boundary['radius'] -= 2*max(p['dxs'])
-
-trajectories['quick'], trajectories['slow'] = domains['inner'].cookie_cutter( all_trajectories )
-
-domains['inner'].boundary['radius'] += 2*max(p['dxs']) + 2*min(p['dxs'])
-_, trajectories['slow'] = domains['inner'].cookie_cutter( trajectories['slow'] )
+trajectories['quick'], trajectories['slow'] = domains['quick'].cookie_cutter( b.getAllTrajectories() )
 
 cutoff = 10
-downsampling = 10
+downsampling = 1
 bootstrap = 10
-dim = 'xy'
+dim = 'x'
 
 for name, trajectories_ in trajectories.items() :
    
@@ -98,6 +87,7 @@ for name, trajectories_ in trajectories.items() :
     for local_dim in dim :
         ax_D.plot( t, 2*len(dim)*D[local_dim]*t, '--', color = colors[name] )
 
+    ax_D.axhline( domains[name].get_area()/pi, color = colors[name], alpha = .1 )
 
 print( 'measured', D)
 print( 'theory', array(p['dxs'])**2/array(p['dts'])/2 )

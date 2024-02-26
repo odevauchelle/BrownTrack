@@ -56,7 +56,7 @@ class trajectory :
 
         Arguments:
         birth_time: Starting time of the trajectory.
-        X: Starting point of the trajectory.
+        X: Starting point of the trajectory
         mummy: Mummified trajectory.
         points: List of points.
 

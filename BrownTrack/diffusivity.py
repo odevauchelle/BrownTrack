@@ -103,7 +103,7 @@ def dispersion( trajectories, with_velocities = False, cutoff = None, dim = 'xy'
         return np.array( output ).T
 
 
-def diffusivity_CVE( x = None, dx = None, dt = 1. ) :
+def diffusivity_CVE( x = None, dx = None, dt = 1., estimator = 'Frishman' ) :
 
     '''
     D = get_diffusivity( x, dt = 1. )
@@ -113,12 +113,17 @@ def diffusivity_CVE( x = None, dx = None, dt = 1. ) :
     Arguments:
         x : one-dimensional series of positions
         dt : time step (defaults to 1.)
+        estimator : "Frishman" or "Vestergaard"
 
     Output:
         D : estimate of diffusivity
 
     Vestergaard, C. L., Blainey, P. C., & Flyvbjerg, H. (2014). Optimal estimation of diffusion coefficients from single-particle trajectories. Physical Review E, 89(2), 022726.
+    Frishman, A., & Ronceray, P. (2020). Learning force fields from stochastic trajectories. Physical Review X, 10(2), 021009.
     '''
+
+
+
 
     if dx is None :
         dx = np.diff( x )
@@ -126,7 +131,15 @@ def diffusivity_CVE( x = None, dx = None, dt = 1. ) :
     else :
         dx = np.array(dx)
 
-    return ( np.mean( dx**2 )/2 + np.mean( dx[1:]*dx[:-1] ) )/dt
+    if estimator == 'Vestergaard' :
+        return ( np.mean( dx**2 )/2 + np.mean( dx[1:]*dx[:-1] ) )/dt
+    
+    elif estimator == 'Frishman' :
+        return ( np.mean( ( dx[1:] + dx[:-1] )**2 )/4 + np.mean( dx[1:]*dx[:-1] )/2 )/dt
+
+
+
+
 
 def diffusivity_2D( trajectories, bootstrap = None, downsampling = None, **kwargs ) :
 

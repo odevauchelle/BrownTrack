@@ -49,7 +49,7 @@ def dispersion( trajectories, with_velocities = False, cutoff = None, dim = 'xy'
     for traj in trajectories :
 
         if not cutoff is None :
-            number_of_slices = int( round( len(traj.x)/cutoff ) )
+            number_of_slices = int( round( len( traj.x )/cutoff ) )
 
         else :
             number_of_slices = 0
@@ -103,6 +103,45 @@ def dispersion( trajectories, with_velocities = False, cutoff = None, dim = 'xy'
         return np.array( output ).T
 
 
+def dispersion_2( trajectories, cutoff = None, dim = 'xy' ) :
+
+    '''
+    dispersion_2( trajectories, cutoff = None, dim = 'xy' )
+    '''
+
+    output = dict( time = [] )
+
+    for d in dim :
+        output[d] = []
+
+    for traj in trajectories :
+        
+        N = len( traj.x )
+        
+        if cutoff is None :
+            cutoff = N
+            
+        nb_full_slices = N//cutoff
+        
+        output['time'] += ( np.arange( cutoff ).tolist()*( nb_full_slices + 1 ) )[:N]
+
+        for d in dim :
+
+            x = np.array( traj.__dict__[d] )
+            x0 = []
+
+            for i in range( nb_full_slices + 1 ) :
+                try :
+                    x0 += [ x[ i*cutoff ] ]*cutoff
+                except : # in case N == cutoff
+                    pass
+
+            x0 = np.array( x0 )[:N]
+            output[d] += list( x - x0 )
+        
+    return output
+
+
 def diffusivity_CVE( x = None, dx = None, dt = 1., estimator = 'Frishman' ) :
 
     '''
@@ -121,9 +160,6 @@ def diffusivity_CVE( x = None, dx = None, dt = 1., estimator = 'Frishman' ) :
     Vestergaard, C. L., Blainey, P. C., & Flyvbjerg, H. (2014). Optimal estimation of diffusion coefficients from single-particle trajectories. Physical Review E, 89(2), 022726.
     Frishman, A., & Ronceray, P. (2020). Learning force fields from stochastic trajectories. Physical Review X, 10(2), 021009.
     '''
-
-
-
 
     if dx is None :
         dx = np.diff( x )

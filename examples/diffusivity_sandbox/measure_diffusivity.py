@@ -74,8 +74,12 @@ bootstrap = 10
 dim = 'x'
 
 for name, trajectories_ in trajectories.items() :
-   
-    t, sigma_2 = bindata( *BT.dispersion( trajectories_, cutoff = cutoff, dim = dim ), nbins = cutoff+1 ).apply()
+    
+    disp = BT.dispersion_2( trajectories_, cutoff = cutoff, dim = dim )
+    binned_data = bindata( disp['time'], disp[dim[-1]], nbins = cutoff + 1 )
+
+    _, sigma_2= binned_data.apply( var )
+    t, _ = binned_data.apply( mean )
 
     D['x'], D['y'], D['std_x'], D['std_y'] = BT.diffusivity_2D( trajectories_, downsampling = downsampling, bootstrap = bootstrap )
     

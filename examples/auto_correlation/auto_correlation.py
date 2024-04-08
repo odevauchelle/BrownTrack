@@ -1,116 +1,124 @@
 from pylab import *
-from numpy.random import normal
-from numpy import correlate
-sys.path.append('/home/olivier/git/BrownTrack/')
+
+sys.path.append('../../../BrownTrack/')
 import BrownTrack as BT
+sys.path.append('../../../bindata/')
+from bindata import bindata
+# create random walkers
 
-t = arange( 1000)
-N = 100
-size =  ( len(t), N )
+L = 50
 tau = 10
-traj_len = 50
+u0 = 0.1
+N = 300
+box = BT.domain( 'Polygon', { 'xy' : ( array( [ [-1,-1], [1,-1], [1,1], [-1,1] ] )*L/2 ) } )
 
-L = 100
+trajectories = BT.bunch()
 
-u = [ array( [0]*N ).T ]
-x = [ array( [0]*N ).T ]
+for _ in range(N) :
+    trajectories.addTrajectory( BT.trajectory( L*( rand( 2 ) - .5 ) ) )
 
-while len(u) < len(t) :
+ux, uy = normal( scale = u0, size = ( 2, N ) )
+
+
+for _ in range(1000) :
     
-    new_u = u[-1]*0.
     updated = rand(N) < 1/tau
-
-    new_u[updated] = normal( size = sum(updated) )
-    new_u[~updated] = u[-1][~updated]
-
-    new_x = x[-1] + new_u
+    ux[updated], uy[updated] = normal( scale = u0, size = ( 2, sum(updated) ) )
     
-    bounce = new_x > L
-    new_x[bounce] -= 2*( new_x[bounce] - L )
+    x, y = array( trajectories.getEnds() ).T
+    x += ux
+    y += uy
 
-    bounce = new_x < - L
-    new_x[bounce] += 2*( - new_x[bounce] - L )
+    sel = x > L/2
+    x[ sel ] = L/2 - ( x[ sel ] - L/2 )
+    ux[ sel ] = -ux[ sel ]
 
-    u += [ new_u ]
-    x += [ new_x ]
+    sel = x < - L/2
+    x[ sel ] = - L/2 + ( - x[ sel ] - L/2 )
+    ux[ sel ] = -ux[ sel ]
 
-u = array( u )
-x = array(x)
+    sel = y > L/2
+    y[ sel ] = L/2 - ( y[ sel ] - L/2 )
+    uy[ sel ] = -uy[ sel ]
 
-fig_disp, (ax_u, ax_x) = subplots(nrows = 2, sharex = True)
+    sel = y < - L/2
+    y[ sel ] = - L/2 + ( - y[ sel ] - L/2 )
+    uy[ sel ] = -uy[ sel ]
+
+    trajectories.grow( new_points = array((x,y)).T )
+
+###################################
+#
+# plot
+#
+###################################
+
+ax = gca()
+
+
+
+ax.add_patch( box.get_patch() )
+
+ax.axis('equal'); ax.axis('off')
+
+
+###################################
+#
+# Dispersion
+#
+###################################
 
 figure()
 ax_sig = gca()
 
+disp = BT.dispersion_2( trajectories.getAllTrajectories(), cutoff = 100*tau, dim = 'xy' )
 
-ax_u.set_ylabel('$u$')
-ax_x.set_ylabel('$x$')
-ax_x.set_xlabel('$t$')
+for dim in 'y' :
 
+    binned_data = bindata( disp['time'], disp[dim], nbins = 100 )
+    t, _ = binned_data.apply(mean)
+    _, sigma = binned_data.apply(var)
 
-ax_sig.set_xlabel('$t$')
-ax_sig.set_ylabel(r'$\sigma^2$')
+    ax_sig.plot( t, sigma, '.', color = 'grey' )
 
+###################################
+#
+# Autocorrelation
+#
+###################################
 
-# ax_u.imshow(u.T)
+box.resize(.9)
+ax.add_patch( box.get_patch() )
 
+cut_trajs, _ = box.cookie_cutter( trajectories.live_trajectories )
 
-for xx in x.T[::10] :
-    ax_x.plot( t[::10], xx[::10], color = 'tab:blue', alpha = .3 )
- 
-
-sigma_2 = var( x, axis = 1 )
-
-ax_sig.plot( t, sigma_2 )
 
 
 figure()
-ax_corr = gca()
-alpha = []
-D_CVE = []
+ax_ac = gca()
 
-correlate_kwargs = dict( mode = 'full' )
+for trajs in [trajectories.live_trajectories, cut_trajs] :
 
+    for traj in trajs[::10] :
+        ax.plot( traj.x, traj.y, color = 'tab:blue', alpha = .3 )
 
-for xx in x.T :
-    
-    xx = xx[:traj_len]
-    uu = diff(xx)
-    ones = [1]*len(uu)
+    alpha = BT.veloctiy_correlation( trajs, max_length = 5*tau )
+    ax_ac.plot( alpha['y'] )
 
-    alpha += [ correlate( uu, uu, **correlate_kwargs )[1:-1]/correlate( ones, ones, **correlate_kwargs  )[1:-1]  ]
-    D_CVE += [ BT.diffusivity_CVE( x = xx ) ]
+    D_tau = BT.autocorrelation_diffusivity( alpha )
+    print(D_tau)
 
-alpha = mean( array(alpha), axis = 0 )
+    t_th = array( [ min(t), max(t) ] )
 
-D = {
-    'CVE' : mean( D_CVE ),
-    'Green-Kubo' : sum( alpha )/2,
-    'exact' : tau/2
-    }
+    ax_sig.plot( t_th, 2*D_tau['D']['y']*t_th, '--'  )
 
-print(D)
+ax_sig.plot( t_th, 2*u0**2*tau*t_th, '-k', zorder = -1 )
 
-for name, D_value in D.items() :
-    
-    ax_sig.plot( t, 2*D_value*t, '--', alpha = .5, label = name )
-
-t = arange(len(alpha))
-t_mean = sum( t*alpha )/sum(alpha)
-tau_alpha = sqrt( sum( ( t-t_mean )**2*alpha )/sum(alpha) )
-
-bound_style = dict( linestyle = '--', color = 'k', alpha = .3 )
-
-for tau in [tau, tau_alpha] :
-    ax_sig.axvline( tau, **bound_style )
-
-ax_sig.axhline( L**2, **bound_style )
-
-ax_sig.legend()
-
-ax_corr.plot( alpha )
 
 ax_sig.set_xscale('log')
 ax_sig.set_yscale('log')
+ax_sig.axhline( L**2, linestyle = ':', color = 'k' )
+
+
 
 show()

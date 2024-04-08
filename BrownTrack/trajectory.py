@@ -268,7 +268,7 @@ class bunch :
         self.dead_trajectories += self.live_trajectories
         self.live_trajectories = []
 
-    def grow( self, tracks, new_points ) :
+    def grow( self, tracks = None, new_points = None ) :
 
         '''
         grow( tracks, new_points )
@@ -277,6 +277,11 @@ class bunch :
         tracks: A list of tuples. Each tuple contains two indices. The first index is that of the trajectory to be grown. The second is that of the new point.
         new_points: The points to be added to the trajectories.
         '''
+        if tracks is None :
+            tracks = np.array( [ arange(  len( self.live_trajectories ) ) ]*2 ).T
+
+        if new_points is None :
+            new_points = self.live_trajectories
 
         for track in tracks :
             self.live_trajectories[ track[0] ].addPoint( new_points[ track[1] ] )

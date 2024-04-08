@@ -18,12 +18,109 @@
 #
 # Based on a library initially developped by O.~Devauchelle, A.~Abramian & E.~Lajeunesse with the help of J.~Heyman
 
-
 import numpy as np
 
+def autocorrelation( u, max_length = None, method = np.correlate ) :
+    '''
+    Normalized autocorrelation.
+
+    alpha = autocorrelation( u, max_length = None, method = np.correlate )
+
+    Arguments:
+        u : a one-dimensional array of length N
+        method : the correlation function.
+    
+    Output:
+        alpha : Autocorreleation vector of u, size N-1. Normalized with the autocorrelation of 1.
+    '''
+
+    N = len(u)
+
+    if max_length is None :
+        return method( u, u, mode = 'full' )[N-1:]/np.arange( 1, N+1 )[::-1]
+    
+    else :
+        return method( u, u[:-max_length], mode = 'valid' )/(N-max_length)
+
+def veloctiy_correlation( trajectories, max_length, dimensions = 'xy', **kwargs ) :
+    '''
+    Averaged, normalized, velocity autocorrelation.
+
+    alpha = autocorrelation( trajectories, dimensions = 'xy', method = np.correlate, **kwargs )
+
+    Arguments:
+        trajectories : a list of trajectories
+        dimensions : the dimensions over which to compute the autocorrelation
+        Keyword arguments are passed on to method.
+    
+    Output:
+        alpha : Velocity autocorreleation vector, size max([ len(traj.x) for traj in trajectories ] )-2. Normalized with the autocorrelation of 1.
+    '''
+
+    alpha = {}
+
+    for dim in dimensions :
+        alpha[dim] = []
+    
+    N = []
+
+    for traj in trajectories :
+
+        data_length = len( traj.__dict__[ dimensions[0] ] ) - 1
+
+        if data_length >= 3 :
+
+            for dim in dimensions :
+
+                u = np.diff( traj.__dict__[dim] )
+                
+                if data_length <= max_length :
+                    alpha[dim] += [ autocorrelation( u, max_length = None, **kwargs ).tolist() ]
+                
+                else :
+                    alpha[dim] += [ autocorrelation( u, max_length = max_length, **kwargs ).tolist() ]
+
+            N += [ len(alpha[dim][-1]) ]
+
+
+
+
+    N_max = max(N)
+
+    for i in range( len(N) ) :
+
+        nan_filling = [ np.nan ]*( N_max - N[i] )
+
+        for dim in dimensions :
+            alpha[dim][i] = alpha[dim][i] + nan_filling
+      
+
+    for dim in dimensions :
+        alpha[dim] = np.nanmean(  alpha[dim], axis = 0 )
+
+    return alpha
+
+def autocorrelation_diffusivity( alpha ) :
+    '''
+    output = autocorrelation_diffusivity( alpha )
+    '''
+
+    output = dict( D = {}, tau = {} )
+
+    for dim in alpha.keys() :
+        t = np.arange(len(alpha[dim]))
+        output['D'][dim] = sum( alpha[dim] )
+        output['tau'][dim] = output['D'][dim]/alpha[dim][0]
+        # output['tau'][dim] = sum( alpha[dim]*t )/output['D'][dim]
+        # output['tau'][dim] = np.sqrt( sum( alpha[dim]*t**2 )/output['D'][dim]/2 )
+
+    return output
 
 def dispersion( trajectories, with_velocities = False, cutoff = None, dim = 'xy' ) :
     '''
+
+    !!! This function works only when the average velocity vanishes !!!
+
     Transforms a list of trajectories into a cloud of points, in the coordinates (time, r**2), where r is the distance to the starting point of each trajectory.
     The first point, of coordinate (0,0), is omitted from the output.
 
@@ -174,9 +271,6 @@ def diffusivity_CVE( x = None, dx = None, dt = 1., estimator = 'Frishman' ) :
         return ( np.mean( ( dx[1:] + dx[:-1] )**2 )/4 + np.mean( dx[1:]*dx[:-1] )/2 )/dt
 
 
-
-
-
 def diffusivity_2D( trajectories, bootstrap = None, downsampling = None, **kwargs ) :
 
     '''
@@ -224,6 +318,19 @@ def diffusivity_2D( trajectories, bootstrap = None, downsampling = None, **kwarg
 
 if __name__ == '__main__' :
 
-    from numpy.random import normal
+    from pylab import *
 
-    print( 'Should be 0.5:', diffusivity_CVE( np.cumsum( normal( size = 1000 ) ) )  )
+    # print( 'Should be 0.5:', diffusivity_CVE( np.cumsum( normal( size = 1000 ) ) )  )
+    u = [2]*50 
+
+
+    # print(u)
+    alpha = autocorrelation(u)
+    # alpha = np.correlate(u,u,mode = 'full')/50
+    plot(alpha)
+    show()
+    # print(alpha)
+    # N = len(u)
+    # print( np.correlate( u, u, mode = 'full' )[N-1:] )
+    # print( np.arange( 1, N+1 )[::-1] )
+    # # print(alpha[N-1:])

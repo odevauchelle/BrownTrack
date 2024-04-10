@@ -89,6 +89,8 @@ The diffusivity is the prefactor of this relation. To estimate it based on our t
 ```Python
 time, r2 = BT.dispersion( inside )
 ```
+(This function works only when the random walk is unbiased. A safer, more recent function is `BT.dispersion_2`).
+
 We then need to average this data over bins, using for instance the [bindata](https://github.com/odevauchelle/bindata) library.
 ```Python
 from bindata import bindata
@@ -108,3 +110,5 @@ errorbar( time, r2, sigma_r2, sigma_time, 'o', label = 'Binned data' )
 ax_std.plot( time, epsilon**2*time, '--', color = std_color, label = 'Theory' )
 ```
 ![Diffusivity](../figures/diffusivity_std_th.svg)
+
+The value of the diffusivity can be estimated by fitting a linear relationship to the data, but there are [better estimators](./diffusivity_estimators.md).

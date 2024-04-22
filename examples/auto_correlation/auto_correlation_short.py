@@ -9,7 +9,7 @@ from bindata import bindata
 # L = 50
 tau = 10
 u0 = .1
-N = 100
+N = 1000
 # box = BT.domain( 'Polygon', { 'xy' : ( array( [ [-1,-1], [1,-1], [1,1], [-1,1] ] )*L/2 ) } )
 
 trajectories = BT.bunch()
@@ -19,7 +19,7 @@ for _ in range(N) :
 
 ux, uy = normal( scale = u0, size = ( 2, N ) )
 
-for _ in range(1000) :
+for _ in range(3*tau) :
 
     updated = rand(N) < 1/tau
     ux[updated], uy[updated] = normal( scale = u0, size = ( 2, sum(updated) ) )
@@ -73,7 +73,7 @@ dim = 'x'
 
 disp = BT.dispersion_2( trajectories.getAllTrajectories(), dim = dim )
 
-binned_data = bindata( disp['time'], disp[dim], nbins = 100 )
+binned_data = bindata( disp['time'], disp[dim], nbins = 30 )
 t, _ = binned_data.apply(mean)
 _, sigma = binned_data.apply(var)
 
@@ -111,8 +111,8 @@ print(D_tau)
 
 t_th = linspace( min(t), max(t), 5)
 
-Dx, Dy = BT.diffusivity_2D( trajs )
-ax_sig.plot( t_th, 2*Dy*t_th, '--', label = 'CVE' )
+# Dx, Dy = BT.diffusivity_2D( trajs )
+# ax_sig.plot( t_th, 2*Dy*t_th, '--', label = 'CVE' )
 
 Dx, Dy = BT.diffusivity_2D( trajs, downsampling = int(3*tau) )
 ax_sig.plot( t_th, 2*Dy*t_th, '--', label = 'Decimated CVE' )
@@ -127,13 +127,13 @@ ax_sig.set_xlabel('Time')
 ax_sig.set_ylabel('Position variance')
 
 
-ax.figure.savefig('trajectory_tau.svg', bbox_inches = 'tight')
-ax_sig.figure.savefig('dispersion_tau.svg', bbox_inches = 'tight')
-ax_ac.figure.savefig('autocorrelation_tau.svg', bbox_inches = 'tight')
+# ax.figure.savefig('trajectory_tau.svg', bbox_inches = 'tight')
+# ax_sig.figure.savefig('dispersion_tau.svg', bbox_inches = 'tight')
+# ax_ac.figure.savefig('autocorrelation_tau.svg', bbox_inches = 'tight')
 
 ax_sig.plot( t_th, 2*D_tau['D'][dim]*t_th, '--', label = 'Autocorrelation' )
 ax_sig.legend()
-ax_sig.figure.savefig('dispersion_tau_autocorr.svg', bbox_inches = 'tight')
+ax_sig.figure.savefig('dispersion_tau_short.svg', bbox_inches = 'tight')
 
 
 

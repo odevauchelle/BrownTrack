@@ -29,7 +29,7 @@ def autocorrelation( u, max_length = None, method = np.correlate ) :
     Arguments:
         u : a one-dimensional array of length N
         method : the correlation function.
-    
+
     Output:
         alpha : Autocorreleation vector of u, size N-1. Normalized with the autocorrelation of 1.
     '''
@@ -38,7 +38,7 @@ def autocorrelation( u, max_length = None, method = np.correlate ) :
 
     if max_length is None :
         return method( u, u, mode = 'full' )[N-1:]/np.arange( 1, N+1 )[::-1]
-    
+
     else :
         return method( u, u[:-max_length], mode = 'valid' )/(N-max_length)
 
@@ -52,7 +52,7 @@ def veloctiy_correlation( trajectories, max_length, dimensions = 'xy', **kwargs 
         trajectories : a list of trajectories
         dimensions : the dimensions over which to compute the autocorrelation
         Keyword arguments are passed on to method.
-    
+
     Output:
         alpha : Velocity autocorreleation vector, size max([ len(traj.x) for traj in trajectories ] )-2. Normalized with the autocorrelation of 1.
     '''
@@ -61,7 +61,7 @@ def veloctiy_correlation( trajectories, max_length, dimensions = 'xy', **kwargs 
 
     for dim in dimensions :
         alpha[dim] = []
-    
+
     N = []
 
     for traj in trajectories :
@@ -73,10 +73,10 @@ def veloctiy_correlation( trajectories, max_length, dimensions = 'xy', **kwargs 
             for dim in dimensions :
 
                 u = np.diff( traj.__dict__[dim] )
-                
+
                 if data_length <= max_length :
                     alpha[dim] += [ autocorrelation( u, max_length = None, **kwargs ).tolist() ]
-                
+
                 else :
                     alpha[dim] += [ autocorrelation( u, max_length = max_length, **kwargs ).tolist() ]
 
@@ -93,10 +93,10 @@ def veloctiy_correlation( trajectories, max_length, dimensions = 'xy', **kwargs 
 
         for dim in dimensions :
             alpha[dim][i] = alpha[dim][i] + nan_filling
-      
+
 
     for dim in dimensions :
-        alpha[dim] = np.nanmean(  alpha[dim], axis = 0 )
+        alpha[dim] = np.nanmean(  alpha[dim], axis = 0 ).tolist()
 
     return alpha
 
@@ -164,7 +164,7 @@ def dispersion( trajectories, with_velocities = False, cutoff = None, dim = 'xy'
         for i in range( len( position[ dim[0] ] ) ) :
 
             time = np.arange( len( position[ dim[0] ][i] ) )
-            
+
             if with_velocities :
                 dt = np.diff(time)
 
@@ -172,8 +172,8 @@ def dispersion( trajectories, with_velocities = False, cutoff = None, dim = 'xy'
 
                 x = position[d][i]
 
-                
-                if i_d == 0 :        
+
+                if i_d == 0 :
                     r2 = ( np.array( x ) - x[0] )**2
 
                 else :
@@ -182,8 +182,8 @@ def dispersion( trajectories, with_velocities = False, cutoff = None, dim = 'xy'
                 if with_velocities :
 
                     additional_ouput += [ np.diff( x )/dt ]
-            
-            
+
+
             additional_ouput = [ time[1:], r2[1:] ]
 
             output += list( np.array( additional_ouput ).T )
@@ -192,10 +192,10 @@ def dispersion( trajectories, with_velocities = False, cutoff = None, dim = 'xy'
 
         if with_velocities :
             return [ np.array([]) ]*len(dim)*2
-        
+
         else :
             return [ np.array([]) ]*len(dim)
-    
+
     else :
         return np.array( output ).T
 
@@ -212,14 +212,14 @@ def dispersion_2( trajectories, cutoff = None, dim = 'xy' ) :
         output[d] = []
 
     for traj in trajectories :
-        
+
         N = len( traj.x )
-        
+
         if cutoff is None :
             cutoff = N
-            
+
         nb_full_slices = N//cutoff
-        
+
         output['time'] += ( np.arange( cutoff ).tolist()*( nb_full_slices + 1 ) )[:N]
 
         for d in dim :
@@ -235,7 +235,7 @@ def dispersion_2( trajectories, cutoff = None, dim = 'xy' ) :
 
             x0 = np.array( x0 )[:N]
             output[d] += list( x - x0 )
-        
+
     return output
 
 
@@ -266,7 +266,7 @@ def diffusivity_CVE( x = None, dx = None, dt = 1., estimator = 'Frishman' ) :
 
     if estimator == 'Vestergaard' :
         return ( np.mean( dx**2 )/2 + np.mean( dx[1:]*dx[:-1] ) )/dt
-    
+
     elif estimator == 'Frishman' :
         return ( np.mean( ( dx[1:] + dx[:-1] )**2 )/4 + np.mean( dx[1:]*dx[:-1] )/2 )/dt
 
@@ -301,7 +301,7 @@ def diffusivity_2D( trajectories, bootstrap = None, downsampling = None, **kwarg
 
     if bootstrap is None :
         return diffusivity_CVE( dx = dx, **kwargs )/downsampling, diffusivity_CVE( dx = dy, **kwargs )/downsampling
-    
+
     else :
 
         Dx = [ diffusivity_CVE( dx = dx, **kwargs ) for dx in np.array_split( dx, bootstrap ) ]
@@ -321,7 +321,7 @@ if __name__ == '__main__' :
     from pylab import *
 
     # print( 'Should be 0.5:', diffusivity_CVE( np.cumsum( normal( size = 1000 ) ) )  )
-    u = [2]*50 
+    u = [2]*50
 
 
     # print(u)

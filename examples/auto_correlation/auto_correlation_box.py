@@ -6,20 +6,20 @@ sys.path.append('../../../bindata/')
 from bindata import bindata
 # create random walkers
 
-# L = 50
+L = 3
 tau = 10
-u0 = .1
-N = 100
+u0 = .2
+N = 1000
 # box = BT.domain( 'Polygon', { 'xy' : ( array( [ [-1,-1], [1,-1], [1,1], [-1,1] ] )*L/2 ) } )
 
 trajectories = BT.bunch()
 
 for _ in range(N) :
-    trajectories.addTrajectory( BT.trajectory( [ 0., 0. ] ) )
+    trajectories.addTrajectory( BT.trajectory( ( rand(2)-.5 )*L ) )
 
 ux, uy = normal( scale = u0, size = ( 2, N ) )
 
-for _ in range(1000) :
+for _ in range(100) :
 
     updated = rand(N) < 1/tau
     ux[updated], uy[updated] = normal( scale = u0, size = ( 2, sum(updated) ) )
@@ -27,22 +27,22 @@ for _ in range(1000) :
     x, y = array( trajectories.getEnds() ).T
     x += ux
     y += uy
-    #
-    # sel = x > L/2
-    # x[ sel ] = L/2 - ( x[ sel ] - L/2 )
-    # ux[ sel ] = -ux[ sel ]
-    #
-    # sel = x < - L/2
-    # x[ sel ] = - L/2 + ( - x[ sel ] - L/2 )
-    # ux[ sel ] = -ux[ sel ]
-    #
-    # sel = y > L/2
-    # y[ sel ] = L/2 - ( y[ sel ] - L/2 )
-    # uy[ sel ] = -uy[ sel ]
-    #
-    # sel = y < - L/2
-    # y[ sel ] = - L/2 + ( - y[ sel ] - L/2 )
-    # uy[ sel ] = -uy[ sel ]
+    
+    sel = x > L/2
+    x[ sel ] = L/2 - ( x[ sel ] - L/2 )
+    ux[ sel ] = -ux[ sel ]
+    
+    sel = x < - L/2
+    x[ sel ] = - L/2 + ( - x[ sel ] - L/2 )
+    ux[ sel ] = -ux[ sel ]
+    
+    sel = y > L/2
+    y[ sel ] = L/2 - ( y[ sel ] - L/2 )
+    uy[ sel ] = -uy[ sel ]
+    
+    sel = y < - L/2
+    y[ sel ] = - L/2 + ( - y[ sel ] - L/2 )
+    uy[ sel ] = -uy[ sel ]
 
     trajectories.grow( new_points = array((x,y)).T )
 
@@ -96,8 +96,12 @@ trajs = trajectories.live_trajectories
 for traj in trajs[::10] :
     ax.plot( traj.x[:30*tau], traj.y[:30*tau], '.', ms = 1, color = 'tab:blue', alpha = .3 )
 
-alpha = BT.veloctiy_correlation( trajs, max_length = 100 )
+alpha = BT.veloctiy_correlation( trajs, max_length = int(tau) )
 ax_ac.plot( alpha['y'] )
+
+t = linspace(0, ax_ac.get_xlim()[1], 30 )
+ax_ac.plot( t, u0**2*(1-t/tau), '--', color = 'grey', alpha = .6 )
+ax_ac.plot( t, u0**2*(1-t/tau-2*t*u0/L), ':', color = 'grey', alpha = .6 )
 
 ax_ac.set_xlabel('Time')
 ax_ac.set_ylabel('Velocity auto-correlation')
@@ -132,7 +136,7 @@ ax_sig.set_ylabel('Position variance')
 ax_sig.plot( t_th, 2*D_tau['D'][dim]*t_th, '--', label = 'Autocorrelation' )
 ax_sig.legend()
 # ax_sig.figure.savefig('dispersion_tau_autocorr.svg', bbox_inches = 'tight')
-
+ax_ac.axhline(0, color = 'k', linestyle = '--', linewidth = rcParams['axes.linewidth'])
 
 
 show()

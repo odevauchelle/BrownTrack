@@ -108,9 +108,9 @@ def autocorrelation_diffusivity( alpha ) :
     output = dict( D = {}, tau = {} )
 
     for dim in alpha.keys() :
-        t = np.arange(len(alpha[dim]))
         output['D'][dim] = sum( alpha[dim] )
         output['tau'][dim] = output['D'][dim]/alpha[dim][0]
+        # t = np.arange(len(alpha[dim]))
         # output['tau'][dim] = sum( alpha[dim]*t )/output['D'][dim]
         # output['tau'][dim] = np.sqrt( sum( alpha[dim]*t**2 )/output['D'][dim]/2 )
 

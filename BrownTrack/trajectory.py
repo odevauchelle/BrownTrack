@@ -92,7 +92,7 @@ class trajectory :
 
         selection = self.birth_time + arange( len( self.x ) ) <= time
 
-        return trajectory( X = ( list( array(self.x)[selection] ), list( array(self.y)[selection]) ), birth_time = self.birth_time )
+        return trajectory( points = array( [ array(self.x)[selection], array(self.y)[selection] ] ).T, birth_time = self.birth_time )
 
     def __getitem__( self, key ) : #  slicing
 
